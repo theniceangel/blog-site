@@ -1511,6 +1511,16 @@ handler 的主要的逻辑可以划分为以下几个部分：
     }
     ```
 
+### 流程图
+
+  梳理了一下流程图，大致如下：
+
+  <img :src="$withBase('/assets/splitChunks_flowchart.png')" height="500" />
+
 ### 总结
 
-  整体逻辑非常清晰，但前提是要对 webpack 有一定的了解，否则一头雾水。里面也用了 deterministicGrouping 的算法，从问题的本质来看是将一组超过 maxSize 的数字，进行二次划分，尽可能的使得子分组的尺寸接近 maxSize，当然 webpack 似乎考虑的更多，可能等到对 webpack 有一个超全面的认知才能够猜得到作者的意图吧。
+  整体逻辑非常清晰，但前提是要对 webpack 有一定的了解，否则一头雾水。里面也用了 deterministicGrouping 的算法，从问题的本质来看是将一组超过总和 maxSize 的数字，进行二次分割，尽可能的使得子分组的大小接近 maxSize，当然 webpack 似乎考虑的更多，官方的原话如下：
+  
+  > The algorithm is deterministic and changes to the modules will only have local impact. So that it is usable when using long term caching and doesn't require records
+
+  似乎跟 seal 阶段的 record* hooks 有关，不太确定，可能等到对 webpack 有一个全面的认知才能够猜得到作者的意图吧。
