@@ -1519,7 +1519,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
 
 ### 总结
 
-  整体逻辑非常清晰，但前提是要对 webpack 有一定的了解，否则一头雾水。里面也用了 deterministicGrouping 的算法，从问题的本质来看是将一组超过总和 maxSize 的数字，进行二次分割，尽可能的使得子分组的大小接近 maxSize，当然 webpack 似乎考虑的更多，官方的原话如下：
+  整体逻辑非常清晰，但前提是要对 webpack 有一定的了解，否则一头雾水。里面也用了 deterministicGrouping 的算法，从问题的本质来看是将一组总和超过 maxSize 的数字，进行二次分割，尽可能的使得子分组的大小接近 maxSize，当然 webpack 似乎考虑的更多，官方的原话如下：
   
   > The algorithm is deterministic and changes to the modules will only have local impact. So that it is usable when using long term caching and doesn't require records
 
