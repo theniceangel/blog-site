@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "vuepress": "^2.0.0-beta.22"
+  },
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  },
+  "name": "blog-site",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:theniceangel/blog-site.git",
+  "author": "jizhi <theniceangel@163.com>",
+  "license": "MIT"
+}
