@@ -1494,4 +1494,4 @@ handler 的主要的逻辑可以划分为以下几个部分：
 
 ### 总结
 
-  整体的 splitChunks 的逻辑分为如上基本，从步骤来看，还是很清晰的，里面也用了 deterministicGrouping 的算法，从问题的本质来看是将一组超过 maxSize 的数字，进行二次划分，尽可能的使得子分组的尺寸接近 maxSize，当然 webpack 似乎考虑的更多，可能等到对 webpack 有一个超全面的认知才能够猜得到作者的意图吧。
+  整体逻辑非常清晰，但前提是要对 webpack 有一定的了解，否则一头雾水。里面也用了 deterministicGrouping 的算法，从问题的本质来看是将一组超过 maxSize 的数字，进行二次划分，尽可能的使得子分组的尺寸接近 maxSize，当然 webpack 似乎考虑的更多，可能等到对 webpack 有一个超全面的认知才能够猜得到作者的意图吧。
