@@ -1,16 +1,16 @@
 # splitChunks
 
-webpack 优化 chunk 的最重要一步是 splitChunksPlugin，对于开发者，可以通过该插件来决定输出的 chunk 的大小，以及被多个 chunk 重复依赖的 modules 应该怎么被打包。自己在之前做一个多页打包的项目优化的时候，也是使用了该配置，当时用的一知半解，这次刚好有计划可以从头到尾研究一番。
+webpack 优化 chunk 的最重要一步是 splitChunksPlugin，对于开发者，可以通过该插件来决定输出的 chunk 的大小，以及被多个 chunk 重复依赖的 modules 应该怎么被打包。自己在之前做一个多页打包的项目优化的时候，也是使用了该配置，当时用的一知半解，翻了网上的一些文章，很少有写的特别好，特别全的分析，刚好有时间自己可以从头到尾研究一番。
 
-大多数人对于 splitChunks 的配置一头雾水，其一是 webpack 的 dependencyGraph 很复杂，还有一个原因是官方文档实在是不能吐槽之再吐槽了，下面会从源码的角度分析配置项的作用，这样方便开发者能够随心所欲地控制 chunks 的输出。
+大多数人对于 splitChunks 的配置一头雾水，其一是 webpack 的 dependencyGraph 很复杂，还有一个原因是官方文档实在是不能吐槽之再吐槽了，下面会从源码的角度分析配置项的作用，方便开发者随心所欲地控制 chunks 的输出。
 
 ## 核心思想
 
 插件的核心原理是**通过 splitChunks 的 cacheGroups 来决定哪些 chunks 需要被额外输出，chunks 由 modules 来组成，而 modules 是否满足加入 cacheGroups 的某个分组的条件取决于 splitChunks 的其他若干配置项**。
 
-因此，我们要抓住的脉络是**哪些 module 丢进了 cacheGroups 的分组对象中，最后伴随着 chunk 写入 js 文件当中**。
+因此，我们要抓住的脉络是**哪些 module 丢进了 cacheGroups 的分组对象中，最后伴随着 chunk 写入 js 文件**。
 
-捋清上述的思路之后，对于 splitChunksPlugin 的源码理解会事半功倍，这里为什么配置项为啥叫 `cacheGroups`，大概的原因是分离出来的 chunk，希望能够被**长期缓存**(long term cache)，所以有一个 cache 的字眼。
+捋清上述的思路之后，对于 splitChunksPlugin 的源码理解会事半功倍，这里为什么配置项为啥叫 `cacheGroups`，大概的原因是分离出来的 chunk 希望能够被**长期缓存**(long term cache)，所以有一个 cache 的字眼。
 
 ## 源码
 
@@ -83,7 +83,7 @@ module.exports = {
 
   - **maxSize**
 
-    默认值为 `0`，表示不验证当前 cacheGroups 分组的文件大小，如果分组的大小超过 maxSize，webpack 内部会采用一种叫 `deterministic grouping` 的算法，对 chunks 里面的 modules 做重新的分割。由于是对 modules 的重新分割，所以最后打出来的 chunk 的尺寸可能违背 maxSize 也可能违背 minSize。
+    默认值为 `0`，表示不验证当前 cacheGroups 分组的文件大小，如果分组的大小超过 maxSize，webpack 内部会采用一种叫 `deterministic grouping` 的算法，对 chunks 里面的 modules 做重新的分割。由于 module 已经是不可再分割的最小单元，所以最后打包的 chunk 的体积可能违背 maxSize 和 minSize。
 
   - **minChunks**
 
@@ -91,10 +91,10 @@ module.exports = {
 
   - **maxInitialRequests**
 
-    默认值为 `3`，为了加载 entrypoint 时，允许的最大并行请求数量。冰箱这个配置项非常难理解，如果不对源码特别熟悉的话，永远不懂它到底是啥意思，这也是我吐槽官方文档写的烂的原因。举个例子：
+    默认值为 `3`，为了加载 entrypoint 时，允许的最大并行请求数量。这个配置项非常难理解，如果不对源码特别熟悉的话，永远不懂它到底是啥意思，这也是我吐槽官方文档写的烂的原因。举个例子：
 
     ```js
-    // 假设 entry.js 作为 webpack 打包的入口，并且引入模块 A 和 模块 B如下
+    // 假设 entry.js 作为 webpack 打包的入口，并且引入模块 A 和 模块 B 如下
     // maxInitialRequests 配置为 2, 分组名称为 default
 
     // entry.js
@@ -113,7 +113,7 @@ module.exports = {
 
   - **maxAsyncRequests**
 
-    默认值为 `5`，加载按需加载模块的时候，最大的并行请求数量，原理与上述的类似。
+    默认值为 `5`，加载按需模块的时候，最大的并行请求数量，原理与上述的类似。
 
     ```js
     // 假设 entry.js 作为 webpack 打包的入口，按需异步加载引入模块 A
@@ -121,20 +121,22 @@ module.exports = {
     // maxAsyncRequests 配置为 2, 分组名称为 default
 
     // entry.js
-    import('./moduleA')
-    // moduleA
+    import(/* webpackChunkName: "asyncChunk" */'./moduleA')
+
+
+    // moduleA.js
     import './moduleB'
     
     // 判断 moduleB 是否要放入分组 default
     // 当前异步加载 moduleA 只需要一个请求，而 maxAsyncRequests 为 2，因此 moduleB 可以放入分组 default
     // 这个时候 webpack 打出来的 entry 伪代码类似如下
-    Promise.all([__webpack_require__.e('./moduleA'), __webpack_require__.e('./moduleB')]).then(()=> {
+    Promise.all([__webpack_require__.e('asyncChunk'), __webpack_require__.e('default')]).then(()=> {
       // ....
     })
     // 如果 maxAsyncRequests 修改为 1，那么 moduleB 就不可以放入分组 default
     ```
 
-    这个案例其实也很好理解，moduleA 是异步加载的 chunk 内部的模块，moduleB 是由异步 chunk 分离出来的 default chunk 的模块，因此必须两个 chunk 都加载好，才能执行 entry 里面的代码。
+    这个案例其实也很好理解，moduleA 是异步加载的 chunk 的模块，moduleB 是由异步 chunk 分离出来的 default chunk 的模块，因此必须两个 chunk 都加载好，才能执行 entry 里面的代码。
   
   - **automaticNameDelimiter**
 
@@ -158,7 +160,7 @@ module.exports = {
 
   - **cacheGroups.{cacheGroup}.enforce**
 
-    忽略 minSize, minChunks, maxAsyncRequests 和 maxInitialRequests 这些配置项的影响，但是还是不能忽略一些其他配置项的影响，比如 chunks，就算配置了 enforce 为 true，假如 module 所属的 chunk 为 async 的话，你也无法将该 module 划分到类型为 initial chunk 的 cacheGroups 分组里面去。这个跟官网的 `always create chunks for this cache group` 这句话有一点出入，再次说明官方文档有多不靠谱。
+    忽略 minSize, minChunks, maxAsyncRequests 和 maxInitialRequests 这些配置项，但是不能忽略一些其他配置项的影响，比如 chunks，就算配置了 enforce 为 true，假如 module 所属的 chunk 为 async 的话，你也无法将该 module 划分到类型为 initial chunk 的 cacheGroups 分组里面去。这个跟官网的 `always create chunks for this cache group` 这句话有一点出入，再次说明官方文档有多不靠谱。
 
   - **cacheGroups.{cacheGroup}.test**
 
@@ -440,39 +442,39 @@ compilation.hooks.optimizeChunksAdvanced.tap(
   })
 ```
 
-optimizeChunksAdvanced hook 触发的时机是在调用 compilation.seal() 内部，seal 是一个非常重要的节点，这个阶段代表了 webpack 已经根据配置的 entrypoints 顺藤摸瓜，把所有的 modules 都解析完成了，在 seal 内部会有各种各样的优化，同时也触发了各种各样优化的钩子，按照顺序大致分为以下的种类。
+optimizeChunksAdvanced hook 触发的时机是在调用 compilation.seal() 内部，seal 是一个非常重要的节点，这个阶段 webpack 已经根据配置的 entry 顺藤摸瓜，解析完所有的 modules，在 seal 内部会有各种各样的优化，同时也触发了各种各样优化的钩子，按照顺序大致分为以下的种类。
 
 ```js
 // 第一步 触发 compilation.hooks.seal
 
-// 第二步 触发关于 Dependencies 的所有钩子
+// 第二步 触发关于优化 Dependencies 的所有钩子
 optimizeDependenciesBasic -> optimizeDependencies -> optimizeDependenciesAdvanced -> afterOptimizeDependencies
 
 // 第三步 先根据 entrypoints(webpack 所有的入口都会对应各自的 entrypoints) 生成对应的 chunks, chunkGroups 等等，接着调用 buildChunkGraph() 来构建 webpack 的 graph，这一步是最复杂的，其中 modules, chunks, chunkGroups 之间会形成 “图” 结构
 
-// 第四步 触发关于 Modules 的所有钩子
+// 第四步 触发关于优化 Modules 的所有钩子
 optimizeModulesBasic -> optimizeModules -> optimizeModulesAdvanced -> afterOptimizeModules
 
-// 第五步 触发关于 Chunks 的所有钩子
+// 第五步 触发关于优化 Chunks 的所有钩子
 optimizeChunksBasic -> optimizeChunks -> optimizeChunksAdvanced -> afterOptimizeChunks
 
 // 后续的暂且不用关注...
 ```
 
-从上面钩子的触发顺序来看，进入到 splitChunksPlugin 的时机是在构建 graph 结构之后，在这个时机，module 已经知道自己被哪些 chunk 依赖了，现在要做的事情就是从这些老 chunk 里面，把 module 分离出来，组成若干个新 chunk，并且新老 chunk 要建立一定的联系，这样最后在输出所有 chunk 的时候才能 chunk 之间的依赖顺序，从而保证运行时的 js 不报错。
+从上面钩子的触发顺序来看，进入到 splitChunksPlugin 的时机是在构建 graph 结构之后，在这个时机，module 已经知道自己被哪些 chunk 依赖了，现在要做的事情就是从这些 chunk 里面，把 module 分离出来，组成若干个新 chunk，并且新老 chunk 要建立一定的联系，这样最后在将 chunk 转成 code 的时候才能知道 chunk 之间的依赖顺序，从而保证运行时的 js 不报错。下面来看看具体的逻辑：
 
 ### 三. compilation.hooks.optimizeChunksAdvanced 的 handler 剖析
 
 handler 的主要的逻辑可以划分为以下几个部分：
 
-1. **标记 splitChunks 在多次构建的过程中只触发一次**
+1. **标记 splitChunks 在多次构建过程中只触发一次**
 
     ```js
     if (alreadyOptimized) return;
     alreadyOptimized = true;
     ```
 
-    只有在 watch 的模式下，文件多次被修改，才会产生多次构建，进而多次触发 handler，最后被这个变量给拦截。
+    只有在 watch 的模式下，文件多次被修改，才会产生多次构建，进而多次触发 handler，最后被这个变量拦截。
     当然这个不是绝对的，如果你使用了 AggressiveSplittingPlugin 可以触发 unseal 操作，重置 alreadyOptimized 为 false。
 
     ```js
@@ -527,7 +529,9 @@ handler 的主要的逻辑可以划分为以下几个部分：
     }
     ```
 
-3. **遍历所有 modules，将 module 划分到对应的 cacheGroups 分组对象下面，最后存入 chunksInfoMap**
+    知道 module 被哪些 chunks 依赖之后，后期就能将 module 加入到满足条件的 cacheGroups 分组对象当中。
+
+3. **遍历所有 modules，将 module 划分到对应的 cacheGroups 分组对象，最后存入 chunksInfoMap**
 
     在这个过程中，同一个 module 可能满足多个 cacheGroups 分组条件，这个没关系，后期会对 chunksInfoMap 做优先级的处理。
 
@@ -539,7 +543,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
     }
     ```
 
-    - 3.1 获取 module 能够匹配上的 cacheGroups 分组
+    - 3.1 获取 module 匹配的 cacheGroups 分组
 
     ```js
     // getCacheGroups 来自于初始化阶段返回的函数
@@ -588,7 +592,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
     4. entry3 依赖了 module2
 
     如果 module2 的体积小于 cacheGroups 的 minSize 限制，会导致 module2 不能加入分组，
-    然而如果 module2 + module1 的体积满足分组的 minSize，那么 module2 是可以加入到该分组
+    然而如果 module2 + module1 的体积满足其他分组的 minSize，那么 module2 是可以加入到其他分组，因为 module2 可以作为三个 chunk 的共同依赖，也可以是 chunk1 和 chunk2 的共同依赖。
 
     换个角度来思考这个问题，module2 因为被三个 entry chunk 依赖，但是由于 minSize 的限制导致无法单独输出到一个 chunk
     但是 module1 和 module2 可以绑定在一起，作为 entry1 和 entry2 的共同依赖，输出到另外一个 chunk
@@ -670,10 +674,10 @@ handler 的主要的逻辑可以划分为以下几个部分：
     *第二步：将所有的分组对象都加入到 chunksInfoMap*
 
     ```js
-    // 遍历对该 module 引用的 chunks 的所有组合集合
+    // 遍历对该 module 引用的 chunks 的所有组合
     // 目的就是把 module 划分到符合条件的 cacheGroups 分组
     for (const chunkCombination of combs) {
-      // 如果引用当前 module 的 chunks 属性小于 minChunks
+      // 如果引用当前 module 的 chunks 数量小于 minChunks
       if (chunkCombination.size < cacheGroup.minChunks) continue;
 
       const {
@@ -719,9 +723,9 @@ handler 的主要的逻辑可以划分为以下几个部分：
 
     ```
 
-    getSelectedChunks 的作用就是缓存，防止重复之前就已经取过的 chunks 组合，内部的  chunkFilter 就是过滤不符合条件的 chunk，举个例子，假如 module 被 initial 和 async chunk 同时依赖，而 cacheGroups 配置的又是 `'initial'`，那么 async chunk 就会被剔除，换句话来说，async chunk 自己就会打包一份 module 代码进去，而不是依赖由 module 组成的 newChunk。
+    getSelectedChunks 的作用就是缓存，防止重复获取已经取过的 chunks 组合，内部的  chunkFilter 就是过滤不符合条件的 chunk，举个例子，假如 module 被 initial 和 async chunk 同时依赖，而 cacheGroups 配置的又是 `'initial'`，那么 async chunk 就会被剔除，换句话来说，async chunk 自己就会打包一份 module 代码进去，而不是依赖由 module 组成的 newChunk。
 
-    addModuleToChunksInfoMap 是整个插件中特别重要的一个环节，它缓存了所有的分组信息，这些分组信息之后会打出一个个 newChunk。
+    addModuleToChunksInfoMap 是整个插件中特别重要的一个环节，它缓存了所有的分组信息，每个分组信息之后对应一个 newChunk。
 
     ```js
     const chunksInfoMap = new Map();
@@ -793,7 +797,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
     })
     ```
 
-    在 info 里面存放了满足该分组条件的 modules，以及引用了这些 modules 的 chunks，还记录这个即将生成的 newChunk 的 size 信息，当然也有可能因为 minSize 和 maxSize 限制导致这个 newChunk 被剔除，胎死腹中！
+    在 info 里面存放了满足该分组条件的 modules，以及引用了这些 modules 的 chunks，还记录这个即将生成的 newChunk 的 size 信息，当然也有可能因为 minSize 和 maxSize 限制导致这个 newChunk 无法生成，胎死腹中！
 
     ok，准备好所有分组信息之后，继续往下走～
 
@@ -825,7 +829,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
 
     - 5.1 找出优先级最高的分组
 
-    compareEntries 会依据 cacheGroups 的 info 信息给分组排序，
+    compareEntries 会依据 cacheGroups 的 info 给分组对象排序，优先级如下：
 
     priority > chunksSize > info.size > cacheGroupIndex > modulesSize > moduleIdentifier
 
@@ -896,7 +900,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
     let newChunk;
     let isReused = false;
     // 复用现有的 chunk，绝大部分情况不会走进内部逻辑
-    // 因为触发的条件非常苛刻
+    // 因为触发的条件非常苛刻，下面会讲为什么
     if (item.cacheGroup.reuseExistingChunk) {
       outer: for (const chunk of item.chunks) {
         // 如果复用的 chunk 内部含有的模块数量和分组的模块数量不同，则不复用
@@ -929,7 +933,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
       }
     }
 
-    // 过滤掉复用的 chunk
+    // 过滤掉可能复用的 chunk
     const selectedChunks = Array.from(item.chunks).filter(chunk => {
       return (
         (!chunkName || chunk.name !== chunkName) && chunk !== newChunk
@@ -955,7 +959,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
 
     a 模块属于 async chunk，如果要将 a 模块分离出来并且 reuseExistingChunk 为 true 的情况下，由于 async chunk 没有含有 entryModule，那么分离出来的 chunk 会直接复用已有的 async chunk。这个场景目前来说非常少见了，我们一般都用动态的 import 语法，不会遇到这个情况。
 
-    *第二步：校验分离出 newChunk 的 usedChunks 是否满足 maxInitialRequests 和 maxAsyncRequests*
+    *第二步：校验即将分离出 newChunk 的 usedChunks 是否满足 maxInitialRequests 和 maxAsyncRequests*
 
     ```js
     const enforced =
@@ -995,7 +999,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
       }
     }
 
-    // 为了加载这个 chunk，需要额外加载的 chunk 的数量
+    // 为了加载这个 chunk，造成的总下载量
     const getRequests = chunk => {
       let requests = 0;
       for (const chunkGroup of chunk.groupsIterable) {
@@ -1007,9 +1011,9 @@ handler 的主要的逻辑可以划分为以下几个部分：
 
     以上的 maxInitialRequests 和 maxAsyncRequests 配置可能让你很疑惑，要完全理解这个，要从 webpack 的运行时来理解。
 
-    首先 splitChunks 的作用就是将 module 分离出去，形成一个 newChunk，
+    首先 splitChunks 的作用就是**从已有的 chunks 将 module 分离出去（**上述的 usedChunks**），形成一个 newChunk，usedChunks 再依赖 newChunk 的加载即可**。
 
-    假如是一个 entryChunk 分离了 newChunk，这个 entryChunk 必定要依赖 newChunk 加载完成，打出来的代码类似于如下：
+    假如是一个 entryChunk 分离了 newChunk，这个 entryChunk 必定要等待 newChunk 加载完成，打出来的代码类似于如下：
 
     ```js
     (function(modules) { // webpackBootstrap 
@@ -1022,7 +1026,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
 
     也就是说，你得手动在 script 里面引入 newChunk 这个 js，entryChunk 才会执行内部逻辑，这也就是起名为 maxInitialRequests 的原因。
 
-    假如是一个 asyncChunk 分离了 newChunk, 并且 asyncChunk 被 entryChunk 消费，那么 entryChunk 会利用两个 require.ensure 并且保证 asyncChunk 和 newChunk 全部加载完毕才执行内部逻辑，其实也很符合我们的预期，首先 asyncChunk 是异步请求的，现在 asyncChunk 内部分离了 module 组成了 newChunk，那么 entryChunk 作为消费者，必须等待两个 chunk 同时 ready，类似的代码如下
+    假如是一个 asyncChunk 分离了 newChunk, 并且 asyncChunk 被 entryChunk 消费，那么 entryChunk 会利用两个 \_\_webpack_require\_\_.e 加载 asyncChunk 和 newChunk，并且等到全部的依赖加载完毕才执行内部逻辑，其实也很符合我们的预期，首先 asyncChunk 是异步请求的，现在 asyncChunk 内部分离了 module 组成了 newChunk，那么 entryChunk 作为消费者，必须等待两个 chunk 同时 ready，类似的代码如下
 
     ```js
 
@@ -1045,7 +1049,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
     // 校验 chunk 是含有分组信息的 module，否则剔除 chunk，什么情况下会发生呢？
     // 首先同一个 module 是可以被多个 cacheGroups 分组归纳进去，并且有优先级
     // 假如 module 已经伴随着上一轮优先级更高的 newChunk 分割出去了，
-    // 并且该 chunk 也已经和上一轮的 newChunk 建立依赖了，不需要再生成含有 module 的 newChunk 了
+    // 则不需要再生成含有 module 的 newChunk 了
     outer: for (const chunk of usedChunks) {
       for (const module of item.modules) {
         if (chunk.containsModule(module)) continue outer;
@@ -1105,7 +1109,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
         newChunk.entryModule = undefined;
       }
     }
-    // 覆盖 newChunk 的名称，此配置项只针对于 initial chunks 分离出来的 newChunk
+    // 覆盖 newChunk 的名称，此配置项只作用在 initial chunks 分离出来的 newChunk
     if (item.cacheGroup.filename) {
       if (!newChunk.isOnlyInitial()) {
         throw new Error(
@@ -1127,7 +1131,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
         }
         // cacheGroups 分组 info 的 modules 全部丢进 newChunk
         GraphHelpers.connectChunkAndModule(newChunk, module);
-        // 断开 module 与 usedchunks 的连接，
+        // 断开 module 与 原有 chunk 的连接，
         // 连接关系已经通过 chunk.split(newChunk) 建立了
         // 实际上 usedChunk 和 newChunk 作为兄弟节点，存放在 usedChunk 的 chunksGroup
         // 方便后期 render -> code 的转化
@@ -1148,11 +1152,26 @@ handler 的主要的逻辑可以划分为以下几个部分：
     ```
 
     5.3 的代码逻辑主要是生成 newChunk，建立 modules 与 newChunk 的连接，并且断开 modules 与原先的 usedChunks 的连接，同时 newChunk 与 usedChunks 作为兄弟节点保存在 chunksGroup 里面，代表着 newChunk 是从 usedChunks 分离出来的。
-
-    - 5.4 将该分组下面的 modules 从其他的分组中剔除
+    
+    如果 usedChunk 的类型是 `'inital'`，那么在生成 webpack runtime bootstrap 的时候会有以下类似的代码：
 
     ```js
-    // 配置了分组的最大体积限制
+    deferredModules.push(["newChunk"]);
+    // run deferred modules when ready
+    return checkDeferredModules();
+    ```
+
+    如果 usedChunk 的类型是 `'async'`，那么消费这个 async chunk 的代码的生成形式如下：
+
+    ```js
+    // newChunk 是从 asyncChunk split 出来的
+    Promise.all([__webpack_require__.e('./asyncChunk'), __webpack_require__.e('./newChunk')]).then((/* ... */))
+    ```
+
+    - 5.4 将该分组下面的 modules 从其他的分组中剔除，等待最后的 maxSize 校验
+
+    ```js
+    // 配置分组的最大体积限制
     if (item.cacheGroup.maxSize > 0) {
       const oldMaxSizeSettings = maxSizeQueueMap.get(newChunk);
       maxSizeQueueMap.set(newChunk, {
@@ -1314,7 +1333,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
       });
 
       for (const node of nodes) {
-        // 既然 module 已经比 maxSize 还大，我们无可奈何，直接作为新的分组
+        // 既然 module 已经比 maxSize 还大，我们无可奈何，直接作为新分组
         if (node.size >= maxSize) {
           result.push(new Group([node], []));
         } else {
@@ -1450,7 +1469,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
 
     ```
 
-    其中最复杂的就是两端从中间靠，根据 similarity 找到最好的分割点，在这之间，可能违背 minSize 和 maxSize 的配置，进而强行将某些 modules 输出成一个 chunk，不过限制 maxSize 的配置我们也比较少用，至于算法为什么这么写，我也百思不得其解，在我看来 similarity 的计算取决于 module 的名称和路径，感觉有点太随机了？
+    其中最复杂的就是两端从中间前进的算法，根据 similarity 找到最好的分割点，在这之间，可能违背 minSize 和 maxSize 的配置，强行将某些 modules 输出成一个 chunk，不过我们也很少配置 maxSize，至于算法为什么这么写，我也百思不得其解，在我看来 similarity 的计算取决于 module 的名称和路径，感觉有点太随机了？
 
     - 6.3 重新生成新的细粒度的 chunk
 
@@ -1471,7 +1490,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
           hashFilename(name);
       }
       let newPart;
-      // 将原本 大体积的 chunk 分割成更细粒度的 chunk
+      // 将原本大体积的 chunk 分割成更细粒度的 chunk
       if (i !== results.length - 1) {
         newPart = compilation.addChunk(name);
         chunk.split(newPart);
