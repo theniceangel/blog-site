@@ -474,8 +474,8 @@ handler 的主要的逻辑可以划分为以下几个部分：
     alreadyOptimized = true;
     ```
 
-    只有在 watch 的模式下，文件多次被修改，才会产生多次构建，进而多次触发 handler，最后被这个变量拦截。
-    当然这个不是绝对的，如果你使用了 AggressiveSplittingPlugin 可以触发 unseal 操作，重置 alreadyOptimized 为 false。
+    在 watch 的模式下，文件多次被修改，才会产生多次构建，进而多次触发 handler，最后被这个变量拦截。
+    当然这不是绝对的，如果你使用了 AggressiveSplittingPlugin 可以触发 unseal 操作，重置 alreadyOptimized 为 false，之后会再次触发 seal 操作，重新走进 splitChunks 执行 handler 再次进行 cacheGroups 分组。
 
     ```js
     compilation.hooks.unseal.tap("SplitChunksPlugin", () => {

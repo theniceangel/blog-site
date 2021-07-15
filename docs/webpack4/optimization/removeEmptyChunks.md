@@ -50,12 +50,20 @@ const handler = chunks => {
     }
   }
 };
+
+class Chunk {
+	hasEntryModule() {
+		return !!this.entryModule;
+	}
+}
 ```
 
 handler 内部遍历所有的 chunks，移除 chunk 的条件必须同时满足以下三个：
 
 1. chunk 没有含有任何的 module；
 
-2. chunk 不能是含有 webpack 的 runtime bootstrap code，[什么是 runtime code](./runtimeChunk.md)；
+2. chunk 不能是含有 webpack 的 runtime bootstrap code，[什么是 runtime code](./runtimeChunk.md)，这种 chunk 自然不能移除；
 
-3. chunk 不能含有 entry module；
+3. chunk 不能含有 entry module，
+
+对于第三点很疑惑，既然 chunk 都是空的，为啥还能包含 entry module 呢？很疑惑，目前并未找到这种 case。

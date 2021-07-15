@@ -247,7 +247,7 @@ for (const entrypoint of compilation.entrypoints.values()) {
 
 前面很好理解，最后一步是生成 runtimeChunk，主要分为两步：
 
-*第一步：如果已有可复用的 runtime chunk，就直接用，否则重新生成一个 chunk*
+*第一步：如果有可复用的 runtime chunk，直接拿来用，否则重新生成一个 chunk*
 
 ```js
 const newChunk = compilation.addChunk(name);
@@ -286,7 +286,7 @@ newChunk.addGroup(entrypoint);
 entrypoint.setRuntimeChunk(newChunk);
 ```
 
-在调用 setRuntimeChunk 方法之后，newChunk 就被升级为 runtime Chunk 了，它是一个 empty chunk，仅仅包含 webpack bootstrap code，同时最开始的 entryChunk 就被降级成普通的 chunk 了，不再含有 webpack bootstrap code，下面举个例子来前后对比下这个配置到底有什么作用。
+在调用 setRuntimeChunk 方法之后，newChunk 就被升级为 runtime Chunk 了，它是一个 empty chunk，仅仅包含 webpack bootstrap code，同时最开始的 entryChunk 就被降级成普通的 chunk 了，不再含有 webpack bootstrap code，而仅仅含有 entryModule，下面举个例子来前后对比下这个配置到底有什么作用。
 
 我准备了一个 entry.js，它作为 webpack 的入口，并且不开启 runtimeChunk 插件
 
@@ -620,6 +620,8 @@ const a = '1'
 /***/ })
 ],[[0,1]]]);
 ```
+
+push 数组的第三个参数会保存在 runtime.js 的 deferredModules 数组里面，并且在调用 checkDeferredModules 方法的时候启动程序。
 
 ### 运行时代码是如何执行的
 
