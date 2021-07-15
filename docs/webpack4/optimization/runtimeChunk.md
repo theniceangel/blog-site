@@ -219,7 +219,7 @@ createChildCompiler 是 compiler 提供的一个方法来创建新构建流程�
 ```js
 // 遍历所有入口的 chunksGroup，entryPoint 是一种特殊的 chunksGroup，因为它含有 runtimeChunk
 for (const entrypoint of compilation.entrypoints.values()) {
-  // 获取 runtimeChunk，也就是由 entryModule 解析所有 moudle 组成的 chunk
+  // 获取默认的 runtimeChunk，也就是由 entry 入口模块解析出来的所有 moudle 组成的 chunk
   // 这个 chunk 就是我们常说的打包出来的 bundle
   const chunk = entrypoint.getRuntimeChunk();
 

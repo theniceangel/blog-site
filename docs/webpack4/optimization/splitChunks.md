@@ -905,8 +905,8 @@ handler 的主要的逻辑可以划分为以下几个部分：
       outer: for (const chunk of item.chunks) {
         // 如果复用的 chunk 内部含有的模块数量和分组的模块数量不同，则不复用
         if (chunk.getNumberOfModules() !== item.modules.size) continue;
-        // 如果复用的 chunk 是一个 entryModule，也就是我们配置的 webpack 入口模块，则不能拿来复用
-        // 为什么呢？因为入口模块带有 webpack runtime bootstrap 代码，无法集成到另外一个 entryModule 
+        // 如果复用的 chunk 是含有 entryModule，也就是我们配置的 webpack 入口模块，则不能拿来复用
+        // 为什么呢？因为入口模块可能含有 webpack runtime bootstrap 代码，会导致复用的 chunk 无法集成现有的 entry chunk
         if (chunk.hasEntryModule()) continue;
         // 接着校验复用的 chunk 必须含有所有的分组的模块，因为上一步只是保证了数量一模一样
         // 综合来看就是必须有一个 asyncChunk，并且其中已有的 modules 与划分到 cacheGroups 分组里面的 modules 相同，这样才能保证复用 chunk 成功
