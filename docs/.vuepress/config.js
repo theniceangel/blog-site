@@ -12,7 +12,12 @@ module.exports = {
       '/webpack4/': [
         {
           text: 'optimization',
-          children: ['/webpack4/optimization/splitChunks.md', '/webpack4/optimization/runtimeChunk.md'],
+          children: [
+            '/webpack4/optimization/splitChunks.md',
+            '/webpack4/optimization/runtimeChunk.md',
+            '/webpack4/optimization/removeEmptyChunks.md',
+            '/webpack4/optimization/noEmitOnErrors.md',
+          ],
         },
       ]
     },

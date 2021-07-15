@@ -1,6 +1,6 @@
-# NoEmitOnErrorsPlugin
+# noEmitOnErrors
 
-插件用来控制构建过程中如果出现了 error，是否跳过输出静态资源的步骤，`production` 环境下才会开启插件。
+noEmitOnErrors 配置项决定是否开启 NoEmitOnErrorsPlugin插件，它的作用是构建过程中如果出现了 error，决定是否跳过输出静态资源的步骤，`production` 环境下才会开启插件。
 
 ```js
 class NoEmitOnErrorsPlugin {
