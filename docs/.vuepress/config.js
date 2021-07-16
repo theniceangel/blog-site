@@ -8,6 +8,7 @@ module.exports = {
   },
   themeConfig: {
     logo: '/assets/logo.jpeg',
+    repo: 'https://github.com/theniceangel',
     sidebar: {
       '/webpack4/': [
         {
@@ -18,13 +19,14 @@ module.exports = {
             '/webpack4/optimization/removeEmptyChunks.md',
             '/webpack4/optimization/noEmitOnErrors.md',
             '/webpack4/optimization/nodeEnv.md',
+            '/webpack4/optimization/namedChunks&chunkIds&occurrenceOrder.md'
           ],
         },
       ]
     },
     navbar: [
       {
-        text: 'Vue 资源合集',
+        text: 'Vue 源码合集',
         children: [
           {
             text: 'v2',
@@ -37,7 +39,7 @@ module.exports = {
         ],
       },
       {
-        text: 'webpack 资源合集',
+        text: 'webpack 源码合集',
         children: [
           {
             text: 'v4',

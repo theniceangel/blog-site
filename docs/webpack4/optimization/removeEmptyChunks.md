@@ -1,6 +1,6 @@
 # removeEmptyChunks
 
-RemoveEmptyChunksPlugin 的作用是用来去除 empty chunks，什么时候会产出 empty chunk 呢？
+RemoveEmptyChunksPlugin 的作用是用来去除 empty chunks，否则你会发现打包出了若干没有任何代码的文件，什么时候会产出 empty chunk 呢？
 
 ## 核心逻辑
 
@@ -155,4 +155,4 @@ if (!chunk.hasEntryModule()) {
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[1],[],[[0,2,0]]]);
 ```
 
-push 的数组参数的第三个元素 [0, 2, 0]，是要被 `runtime.js` 的 `webpackJsonpCallback` 消费的，因为这个是程序的启动入口，而 `main.js` 的代码生成，也就是 [0, 2, 0] 这个是依赖 mainChunk.entryModule 信息的，代表着 runtime.js 的程序入口。
+push 的数组参数的第三个元素 [0, 2, 0]，是要被 `runtime.js` 的 `webpackJsonpCallback` 消费的，因为这个是程序的启动入口，而 `main.js` 的代码生成，也就是 [0, 2, 0] 必须依赖 mainChunk.entryModule 信息，代表着 runtime.js 的程序入口。
