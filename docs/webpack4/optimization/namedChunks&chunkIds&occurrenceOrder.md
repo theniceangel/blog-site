@@ -18,7 +18,7 @@ if (chunkIds === undefined) {
   if (options.optimization.namedChunks) {
     chunkIds = "named";
   }
-  // fallback 为 'natural'
+  // fallback 方案
   if (chunkIds === undefined) {
     chunkIds = "natural";
   }
@@ -106,9 +106,11 @@ class Compilation {
 }
 ```
 
-可以看到先生成了 module id，接着走到 NaturalChunkOrderPlugin 内部。
+可以看到先生成了 module id，接着走到 NaturalChunkOrderPlugin 内部，接着执行具体的逻辑：
 
 ```js
+// 处理逻辑
+
 chunks.sort((chunkA, chunkB) => {
   const a = chunkA.modulesIterable[Symbol.iterator]();
   const b = chunkB.modulesIterable[Symbol.iterator]();
@@ -153,7 +155,7 @@ class OccurrenceOrderChunkIdsPlugin {
 				compilation.hooks.optimizeChunkOrder.tap(
 					"OccurrenceOrderChunkIdsPlugin",
 					chunks => {
-						// ...
+						// ... handle
 					}
 				);
 			}
@@ -162,9 +164,10 @@ class OccurrenceOrderChunkIdsPlugin {
 }
 ```
 
-OccurrenceChunkOrderPlugin 的触发时机与 NaturalChunkOrderPlugin 一致，不过它支持 prioritiseInitial 配置，当 chunkIds 配置为 `'named' | 'total-size'` 的时候，prioritiseInitial 为 false，为 `'size'` 的时候，prioritiseInitial 为 true。
+OccurrenceChunkOrderPlugin 的触发时机与 NaturalChunkOrderPlugin 一致，不过它支持 prioritiseInitial 配置，当 chunkIds 配置为 `'named' | 'total-size'` 的时候，prioritiseInitial 为 false，为 `'size'` 的时候，prioritiseInitial 为 true，具体逻辑如下：
 
 ```js
+// handle
 const occursInInitialChunksMap = new Map();
   const originalOrder = new Map();
 
@@ -206,7 +209,7 @@ const occursInInitialChunksMap = new Map();
 
 // TODO 后期补充说明什么是 chunkGroup, entrypoint
 
-prioritiseInitial 主要是用来对比两个 async chunk 被 initial chunk 引用的次数，什么是 async 与 initial chunk，举个例子：
+prioritiseInitial 主要是用来对比两个 chunk 被 initial chunk 引用的次数，什么是 initial chunk，举个例子：
 
 ```js
 // index.js webpack 的入口文件
@@ -216,7 +219,7 @@ import(/* webpackChunkName: "a" */'./a.js)
 export default a = 1
 ```
 
-webpack 打包后，会有两个文件，一个是 `bundle.js`，一个是 `a.js`，`bundle.js` 就是由 initial chunk 生成的，`a.js` 就是由上述 import 语法而生成的 async chunk，所以在对比 a 这个 async chunk 的时候，由于它的 occurs 数量更大，在 this.applyChunkIds 的处理过程中，优先被分配 id。
+webpack 打包后，会有两个文件，一个是 `bundle.js`，一个是 `a.js`，`bundle.js` 就是由 initial chunk 生成的，`a.js` 就是由上述 import 语法而生成的 async chunk，所以在对比 a 这个 async chunk 的时候，由于它的 occurs 数量更大，在 this.applyChunkIds 的遍历 chunks 过程中，优先被分配 id。
 
 ## NamedChunksPlugin
 
