@@ -16,11 +16,13 @@ module.exports = {
           children: [
             '/webpack4/optimization/splitChunks.md',
             '/webpack4/optimization/runtimeChunk.md',
+            '/webpack4/optimization/removeAvailableModules.md',
             '/webpack4/optimization/removeEmptyChunks.md',
             '/webpack4/optimization/noEmitOnErrors.md',
             '/webpack4/optimization/nodeEnv.md',
             '/webpack4/optimization/namedModules&moduleIds&occurrenceOrder&hashedModuleIds.md',
             '/webpack4/optimization/namedChunks&chunkIds&occurrenceOrder.md',
+            
           ],
         },
       ]

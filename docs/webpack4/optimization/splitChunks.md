@@ -156,7 +156,7 @@ module.exports = {
   
   - **cacheGroups.{cacheGroup}.reuseExistingChunk**
 
-    生成分组对象对应的 chunk 时，是否能复用已有的 chunk。满足该条件非常的苛刻，这个场景后面会提到。
+    生成分组对象对应的 chunk 时，是否能复用已有的 chunk。
 
   - **cacheGroups.{cacheGroup}.enforce**
 
@@ -899,8 +899,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
     let chunkName = item.name;
     let newChunk;
     let isReused = false;
-    // 复用现有的 chunk，绝大部分情况不会走进内部逻辑
-    // 因为触发的条件非常苛刻，下面会讲为什么
+    // 复用现有的 chunk
     if (item.cacheGroup.reuseExistingChunk) {
       outer: for (const chunk of item.chunks) {
         // 如果复用的 chunk 内部含有的模块数量和分组的模块数量不同，则不复用
@@ -941,23 +940,37 @@ handler 的主要的逻辑可以划分为以下几个部分：
     });
     ```
 
-    什么场景下才会使得复用一个已有的 chunk 成功呢，这个与早期的 require.ensure 的用法有关，比如以下场景：
+    什么场景下才会复用一个已有的 chunk 呢，比如以下场景：
 
     ```js
     // entry.js webpack 入口模块
-    require.ensure(
-      [],
-      function(require) {
-        require("./a")
-      },
-      "a"
-    );
+    import('./a.js')
 
     // a.js
     module.exports = "a";
+
+    // webpack.config.js
+    module.exports = {
+      optimization: {
+        minimize: false,
+        runtimeChunk: 'single',
+        splitChunks: {
+          minSize: 1,
+          name: true,
+          cacheGroups: {
+            default: {
+              minChunks: 1,
+              priority: 10,
+              reuseExistingChunk: true,
+              chunks: 'async',
+            }
+          }
+        }
+      },
+    }
     ```
 
-    a 模块属于 async chunk，如果要将 a 模块分离出来并且 reuseExistingChunk 为 true 的情况下，由于 async chunk 没有含有 entryModule，那么分离出来的 chunk 会直接复用已有的 async chunk。这个场景目前来说非常少见了，我们一般都用动态的 import 语法，不会遇到这个情况。
+    a 模块已经属于 async chunk，由于 a 模块命中了 default cacheGroups 分组，那么分离出来的 chunk 会直接复用已有的 async chunk。
 
     *第二步：校验即将分离出 newChunk 的 usedChunks 是否满足 maxInitialRequests 和 maxAsyncRequests*
 
