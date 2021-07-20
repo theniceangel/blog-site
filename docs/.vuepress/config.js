@@ -12,6 +12,14 @@ module.exports = {
     sidebar: {
       '/webpack4/': [
         {
+          text: '术语',
+          children: [
+            '/webpack4/term/module.md',
+            '/webpack4/term/chunk.md',
+            '/webpack4/term/entrypoint&chunkGroup.md'
+          ]
+        },
+        {
           text: 'optimization',
           children: [
             '/webpack4/optimization/splitChunks.md',
@@ -25,7 +33,7 @@ module.exports = {
             '/webpack4/optimization/namedChunks&chunkIds&occurrenceOrder.md',
             
           ],
-        },
+        }
       ]
     },
     navbar: [
