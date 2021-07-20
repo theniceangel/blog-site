@@ -1,5 +1,7 @@
 # chunkGroup、entrypoint
 
+[[toc]]
+
 ## chunkGroup
 
 根据 webpack 作者 [webpack 4: Code Splitting, chunk graph and the splitChunks optimization](https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366) 文章的描述，chunkGroup 的出现是为了解决以前 `CommonsChunkPlugin` 留下来的坑，以前 chunks 之间的联系都是通过父子关系来描述，这种关系很难阐释清除 `splitting chunk` 的关系，而 chunkGroup 的引入就是为了解决这种关系，entrypoint 或者 code splitting 都会生成对应的 chunkGoup 实例，如果使用了 [runtimeChunk](../optimization/runtimeChunk.md) 或者 [splitChunks](../optimization/splitChunks.md) 配置衍生出来的 chunk，就会连同原先的 chunk 保存在的chunkGroup 中，AggressiveSplittingPlugin 插件生成的 chunks 也是类似的原理。示意图如下：

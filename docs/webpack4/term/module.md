@@ -14,7 +14,7 @@ import './a.js'
 export default 'a'
 ```
 
-上面的例子 index.js 作为 webpack 的入口文件，其中 a.js 就是一个 normalModule。运行 webpack 打包之后编：
+在这个例子中，index.js 作为 webpack 的入口文件，其中 a.js 就是一个 normalModule。运行 webpack 打包之后：
 
 :::details webpack.config.js
 ```js
@@ -68,9 +68,376 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _a_j
 /******/ });
 ```
 
+## multiModule
+
+webpack entry 配置成数组，会生成 multiModule，举个例子：
+
+:::details webpack.config.js
+```js
+const path = require('path')
+
+module.exports = {
+  mode: "development",
+  context: __dirname,
+  devtool: false,
+  entry: ['./a.js', './b.js'],
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js"
+  },
+  optimization: {
+    minimize: false
+  }
+};
+```
+:::
+
+:::details a.js
+```js
+export default 'a'
+```
+:::
+
+:::details b.js
+```js
+export default 'b'
+```
+:::
+
+运行 webpack 打包命令之后，会在 dist 目录下面打出 `main.js`。
+
+:::details dist/main.js
+```js
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ "./a.js":
+/*!**************!*\
+  !*** ./a.js ***!
+  \**************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ('a');
+
+/***/ }),
+
+/***/ "./b.js":
+/*!**************!*\
+  !*** ./b.js ***!
+  \**************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ('b');
+
+/***/ }),
+
+/***/ 0:
+/*!***************************!*\
+  !*** multi ./a.js ./b.js ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(/*! ./a.js */"./a.js");
+module.exports = __webpack_require__(/*! ./b.js */"./b.js");
+
+
+/***/ })
+
+/******/ });
+```
+:::
+
+从打包的代码来看，有一个 `multi ./a.js ./b.js` 的模块，它是由 webpack 内部的 MultiModule 创建而来，聚合了 a 和 b 模块。相当于声明了一种特殊的 entry，也就是 entry 数组最后一个模块会被暴露出去，类似于：
+
+```js
+// multi ./a.js ./b.js
+import './a.js'
+export * from './b.js'
+```
+
+## externalModule
+
+externalModule 代表命中了 webpack externals 配置的模块，举个例子：
+
+:::details webpack.config.js
+```js
+const path = require('path')
+module.exports = {
+  mode: "development",
+  context: __dirname,
+  devtool: false,
+	entry: './index.js',
+	output: {
+		path: path.join(__dirname, "dist")
+	},
+	optimization: {
+    minimize: false,
+  },
+  externals: {
+    jquery: '$'
+  }
+};
+```
+:::
+
+:::details index.js
+```js
+import $ from 'jquery'
+
+$('.my-element').animate(/* ... */);
+```
+:::
+
+运行 webpack 打包命令之后，在 dist 目录下的文件如下：
+
+:::details main.js
+```js
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = "./index.js");
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ "./index.js":
+/*!******************!*\
+  !*** ./index.js ***!
+  \******************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jquery */ "jquery");
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_0__);
+
+
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('.my-element').animate(/* ... */);
+
+/***/ }),
+
+/***/ "jquery":
+/*!********************!*\
+  !*** external "$" ***!
+  \********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = $;
+
+/***/ })
+
+/******/ });
+```
+:::
+
+jquery 模块就是 external module，它的模块导出受到 webpack externals 的影响，被替换成 `"$"` 了，代表 window 下面必须前置定义了 `$` 的实现，要不然会报错。我们一般是自己在 html 引入 jquery 的 cdn，再引入打包后的 js，这样 jquery 就能 cdn 利用长期缓存。
+
+但是模块的导出并不一定是字符串，它是受到 output.libraryTarget 的影响，如果将 output.libraryTarget 配置成 `commonjs2`，那 jquery 的模块导出就变成下面这种形式了。
+
+```js
+{
+  "jquery":
+  /*!********************!*\
+    !*** external "$" ***!
+    \********************/
+  /*! no static exports found */
+  (function(module, exports) {
+
+    module.exports = require("$");
+
+  })
+}
+```
+
+这种情况一般是用在开发 library 的时候，希望应用程序在引用这个 library 的时候，随着 Application 一起打包，这样可以做一定的优化，比如开发的 library 依赖 babel transpile，但是跟随着 Application 一起打包可以减少 babel 的冗余代码。
+
+// TODO 开一篇文章补充 externals 的详细配置
+
+## dllModule
+
+// TODO
+
+## delegatedModule
+
+// TODO
+
 ## entryModule
 
-entryModule 比较特殊，它代表程序的启动点，
+entryModule 比较特殊，与上述各种 module 不同，它不是一种独特类型的 module，仅仅代表当前 module 是程序的启动点，
 
 1. **字符串 entry 配置**
 
@@ -458,182 +825,7 @@ entryModule 比较特殊，它代表程序的启动点，
 
 3. **数组 entry 配置**
 
-    数组配置的 entry 会很特殊，不再是你明面上配置的那些模块了，那到底是什么呢？举个例子：
-
-    :::details webpack.config.js
-    ```js
-    const path = require('path')
-
-    module.exports = {
-      mode: "development",
-      context: __dirname,
-      devtool: false,
-      entry: ['./a.js', './b.js'],
-      output: {
-        path: path.join(__dirname, "dist"),
-        filename: "[name].js"
-      },
-      optimization: {
-        minimize: false
-      }
-    };
-    ```
-    :::
-
-    :::details a.js
-    ```js
-    export default 'a'
-    ```
-    :::
-
-    :::details b.js
-    ```js
-    export default 'b'
-    ```
-    :::
-
-    运行 webpack 打包命令之后，会在 dist 目录下面打出 `main.js`。
-
-    :::details dist/main.js
-    ```js
-    /******/ (function(modules) { // webpackBootstrap
-    /******/ 	// The module cache
-    /******/ 	var installedModules = {};
-    /******/
-    /******/ 	// The require function
-    /******/ 	function __webpack_require__(moduleId) {
-    /******/
-    /******/ 		// Check if module is in cache
-    /******/ 		if(installedModules[moduleId]) {
-    /******/ 			return installedModules[moduleId].exports;
-    /******/ 		}
-    /******/ 		// Create a new module (and put it into the cache)
-    /******/ 		var module = installedModules[moduleId] = {
-    /******/ 			i: moduleId,
-    /******/ 			l: false,
-    /******/ 			exports: {}
-    /******/ 		};
-    /******/
-    /******/ 		// Execute the module function
-    /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-    /******/
-    /******/ 		// Flag the module as loaded
-    /******/ 		module.l = true;
-    /******/
-    /******/ 		// Return the exports of the module
-    /******/ 		return module.exports;
-    /******/ 	}
-    /******/
-    /******/
-    /******/ 	// expose the modules object (__webpack_modules__)
-    /******/ 	__webpack_require__.m = modules;
-    /******/
-    /******/ 	// expose the module cache
-    /******/ 	__webpack_require__.c = installedModules;
-    /******/
-    /******/ 	// define getter function for harmony exports
-    /******/ 	__webpack_require__.d = function(exports, name, getter) {
-    /******/ 		if(!__webpack_require__.o(exports, name)) {
-    /******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-    /******/ 		}
-    /******/ 	};
-    /******/
-    /******/ 	// define __esModule on exports
-    /******/ 	__webpack_require__.r = function(exports) {
-    /******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-    /******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-    /******/ 		}
-    /******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-    /******/ 	};
-    /******/
-    /******/ 	// create a fake namespace object
-    /******/ 	// mode & 1: value is a module id, require it
-    /******/ 	// mode & 2: merge all properties of value into the ns
-    /******/ 	// mode & 4: return value when already ns object
-    /******/ 	// mode & 8|1: behave like require
-    /******/ 	__webpack_require__.t = function(value, mode) {
-    /******/ 		if(mode & 1) value = __webpack_require__(value);
-    /******/ 		if(mode & 8) return value;
-    /******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-    /******/ 		var ns = Object.create(null);
-    /******/ 		__webpack_require__.r(ns);
-    /******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-    /******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-    /******/ 		return ns;
-    /******/ 	};
-    /******/
-    /******/ 	// getDefaultExport function for compatibility with non-harmony modules
-    /******/ 	__webpack_require__.n = function(module) {
-    /******/ 		var getter = module && module.__esModule ?
-    /******/ 			function getDefault() { return module['default']; } :
-    /******/ 			function getModuleExports() { return module; };
-    /******/ 		__webpack_require__.d(getter, 'a', getter);
-    /******/ 		return getter;
-    /******/ 	};
-    /******/
-    /******/ 	// Object.prototype.hasOwnProperty.call
-    /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-    /******/
-    /******/ 	// __webpack_public_path__
-    /******/ 	__webpack_require__.p = "";
-    /******/
-    /******/
-    /******/ 	// Load entry module and return exports
-    /******/ 	return __webpack_require__(__webpack_require__.s = 0);
-    /******/ })
-    /************************************************************************/
-    /******/ ({
-
-    /***/ "./a.js":
-    /*!**************!*\
-      !*** ./a.js ***!
-      \**************/
-    /*! exports provided: default */
-    /***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-    "use strict";
-    __webpack_require__.r(__webpack_exports__);
-    /* harmony default export */ __webpack_exports__["default"] = ('a');
-
-    /***/ }),
-
-    /***/ "./b.js":
-    /*!**************!*\
-      !*** ./b.js ***!
-      \**************/
-    /*! exports provided: default */
-    /***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-    "use strict";
-    __webpack_require__.r(__webpack_exports__);
-    /* harmony default export */ __webpack_exports__["default"] = ('b');
-
-    /***/ }),
-
-    /***/ 0:
-    /*!***************************!*\
-      !*** multi ./a.js ./b.js ***!
-      \***************************/
-    /*! no static exports found */
-    /***/ (function(module, exports, __webpack_require__) {
-
-    __webpack_require__(/*! ./a.js */"./a.js");
-    module.exports = __webpack_require__(/*! ./b.js */"./b.js");
-
-
-    /***/ })
-
-    /******/ });
-    ```
-    :::
-
-    从打包的代码来看，entryModule 是一个叫 `multi ./a.js ./b.js` 的模块，它是由 webpack 内部的 MultiModule 创建而来，聚合了 a 和 b 模块。相当于声明了一种特殊的 entry，也就是 entry 数组最后一个模块会被暴露出去，类似于：
-
-    ```js
-    // multi ./a.js ./b.js
-    import './a.js'
-    export * from './b.js'
-    ```
+    就如 [MultiModule](./module.md#multimodule) 所述，entryModule 其实就是这个 multiModule。
 
 4. **Dynamic entry 配置**
 
@@ -654,7 +846,6 @@ entryModule 比较特殊，它代表程序的启动点，
   ```
 
   所以 entryModule 与前面数组、对象、字符串的情况一模一样。
-
 
 ## 关于 module 的类
 
