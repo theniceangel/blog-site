@@ -475,6 +475,14 @@
     "@vuepress/core" "2.0.0-beta.22"
     prismjs "^1.24.1"
 
+"@vuepress/plugin-shiki@2.0.0-beta.22":
+  version "2.0.0-beta.22"
+  resolved "https://registry.nlark.com/@vuepress/plugin-shiki/download/@vuepress/plugin-shiki-2.0.0-beta.22.tgz#fd8def07b470a895a83f25a60b4b217073ee2feb"
+  integrity sha1-/Y3vB7RwqJWoPyWmC0shcHPuL+s=
+  dependencies:
+    "@vuepress/core" "2.0.0-beta.22"
+    shiki "^0.9.5"
+
 "@vuepress/plugin-theme-data@2.0.0-beta.22":
   version "2.0.0-beta.22"
   resolved "https://registry.nlark.com/@vuepress/plugin-theme-data/download/@vuepress/plugin-theme-data-2.0.0-beta.22.tgz#dd1acf8305ba2fd8ebae4802f551e090c8c09307"
@@ -2633,6 +2641,13 @@ onetime@^5.1.0, onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
+onigasm@^2.2.5:
+  version "2.2.5"
+  resolved "https://registry.nlark.com/onigasm/download/onigasm-2.2.5.tgz#cc4d2a79a0fa0b64caec1f4c7ea367585a676892"
+  integrity sha1-zE0qeaD6C2TK7B9MfqNnWFpnaJI=
+  dependencies:
+    lru-cache "^5.1.1"
+
 open@^7.4.2:
   version "7.4.2"
   resolved "https://registry.nlark.com/open/download/open-7.4.2.tgz#b8147e26dcf3e426316c730089fd71edd29c2321"
@@ -3202,6 +3217,15 @@ shebang-regex@^3.0.0:
   resolved "https://registry.npm.taobao.org/shebang-regex/download/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha1-rhbxZE2HPsrYQ7AwexQzYtTEIXI=
 
+shiki@^0.9.5:
+  version "0.9.5"
+  resolved "https://registry.nlark.com/shiki/download/shiki-0.9.5.tgz#c8da81a05fbfd1810729c6873901a729a72ec541"
+  integrity sha1-yNqBoF+/0YEHKcaHOQGnKacuxUE=
+  dependencies:
+    json5 "^2.2.0"
+    onigasm "^2.2.5"
+    vscode-textmate "5.2.0"
+
 signal-exit@^3.0.2, signal-exit@^3.0.3:
   version "3.0.3"
   resolved "https://registry.npm.taobao.org/signal-exit/download/signal-exit-3.0.3.tgz#a1410c2edd8f077b08b4e253c8eacfcaf057461c"
@@ -3509,6 +3533,11 @@ vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.npm.taobao.org/vary/download/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha1-IpnwLG3tMNSllhsLn3RSShj2NPw=
+
+vscode-textmate@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.nlark.com/vscode-textmate/download/vscode-textmate-5.2.0.tgz#01f01760a391e8222fe4f33fbccbd1ad71aed74e"
+  integrity sha1-AfAXYKOR6CIv5PM/vMvRrXGu104=
 
 vue-loader@^16.3.0:
   version "16.3.0"

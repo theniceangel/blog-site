@@ -585,7 +585,7 @@ handler 的主要的逻辑可以划分为以下几个部分：
 
     getCombinations 内部有一个 for 循环特别难理解，为什么要加这么一段代码呢，得想清一些问题，举个例子
 
-    ```markup
+    ```html
     1. 假如有三个 webpack 入口 entry1, entry2, entry3
     2. entry1 依赖了 module1, module2
     3. entry2 依赖了 module1, module2

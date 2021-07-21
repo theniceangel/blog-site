@@ -11,5 +11,8 @@
   "main": "index.js",
   "repository": "git@github.com:theniceangel/blog-site.git",
   "author": "jizhi <theniceangel@163.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@vuepress/plugin-shiki": "2.0.0-beta.22"
+  }
 }

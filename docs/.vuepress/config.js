@@ -65,4 +65,12 @@ module.exports = {
       }
     ],
   },
+  plugins: [
+    [
+      '@vuepress/plugin-shiki',
+      {
+        theme: 'dark-plus'
+      }
+    ]
+  ]
 }
