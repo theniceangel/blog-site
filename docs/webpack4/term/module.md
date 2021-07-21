@@ -423,21 +423,350 @@ jquery 模块就是 external module，它的模块导出受到 webpack externals
 }
 ```
 
-这种情况一般是用在开发 library 的时候，希望应用程序在引用这个 library 的时候，随着 Application 一起打包，这样可以做一定的优化，比如开发的 library 依赖 babel transpile，但是跟随着 Application 一起打包可以减少 babel 的冗余代码。
+这种情况一般是用在开发 library 的时候，希望 Application 在引用这个 library 的时候，随着 Application 一起打包，这样可以做一定的优化，比如开发的 library 依赖 babel transpile，跟随着 Application 一起打包可以减少 babel 的冗余代码。
 
 // TODO 开一篇文章补充 externals 的详细配置
 
 ## dllModule
 
-// TODO
+开启 DllPlugin 配置之后，webpack 内部会包含 dllModule，举个例子：
+
+:::details webpack.config.js
+```js
+var path = require("path");
+var webpack = require("webpack");
+module.exports = {
+	resolve: {
+		extensions: [".js", ".jsx"]
+	},
+	context: __dirname,
+	entry: {
+		alpha: ["./a"], // alpha value 必须是一个数组
+	},
+	output: {
+		path: path.join(__dirname, "dist"),
+		filename: "MyDll.[name].js",
+		library: "__MYDLL__"
+	},
+	optimization: {
+		minimize: false,
+	},
+	plugins: [
+		new webpack.DllPlugin({
+			path: path.join(__dirname, "dist", "[name]-manifest.json"),
+			name: "__MYDLL__"
+		})
+	]
+};
+```
+:::
+
+:::details a.js
+```js
+module.exports = "a";
+```
+:::
+
+运行 webpack 打包命令之后，webpack 内部会生成一个 dllModule，它的作用就是用来返回 `__webpack_require__` 函数，方便其他的应用程序引用内部的模块，打包出来的代码如下：
+
+:::details dist/MyDll.alpha.js
+```js
+var __MYDLL__ =
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__;
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+module.exports = "a";
+
+/***/ })
+/******/ ]);
+```
+:::
+
+其中 dllModule 就是生成 module id 为 0 的模块，主要是将 `__webpack_require__` 赋值给 webpack library 配置的 `'__MYDLL__'`，这样其他的应用程序就可以消费里面的 module，比如 module id 为 1 的模块，也就是 webpack entry 配置的 `['./a.js']`。
+
+// TODO 后期得新开一篇文章讲解 DllPlugin 的整体流程。
+
 
 ## delegatedModule
 
-// TODO
+DllReferencePlugin 一般搭配 DllPlugin 使用，内部使用了 DelegatedModule，delegatedModule 的生成是为了消费上述 `dist/MyDll.alpha.js` 含有的 module，主要的作用是对现有程序里面的模块做代理，这样就能使用 DllPlugin 打包出来的动态软链文件中的模块了。基于上述 dllModule 的代码新增以下代码。
+
+:::details 新增 webpack.config.ref.js
+```js
+var path = require("path");
+var webpack = require("webpack");
+module.exports = {
+  context: __dirname,
+  entry: './index.js',
+	output: {
+		path: path.join(__dirname, "dist"),
+		filename: "[name].js",
+	},
+	optimization: {
+		minimize: false,
+	},
+	plugins: [
+		new webpack.DllReferencePlugin({ // 消费 dist/MyDll.alpha.js
+      context: __dirname,
+			manifest: require("./dist/alpha-manifest.json") // eslint-disable-line
+		})
+	]
+};
+```
+:::
+
+:::details index.js
+```js
+import './a.js' // 这个模块会变成 delegatedModule 而不是原本的 normalModule
+
+console.log('消费 dll bundle')
+```
+:::
+
+运行 webpack 打包命令之后，在 dist 目录下会生成 `main.js`。
+
+:::details dist/main.js
+```js
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _a_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+/* harmony import */ var _a_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_a_js__WEBPACK_IMPORTED_MODULE_0__);
+
+
+console.log('消费 dll bundle')
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = (__webpack_require__(2))(1);
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = __MYDLL__;
+
+/***/ })
+/******/ ]);
+```
+:::
+
+其中 module id 为 1 的模块就是 delegatedModule，对应于上面的 `import './a.js'`，module id 为 2 的模块是一个 externalModule，主要是为了连接上述的 `dist/MyDll.alpha.js` 中的逻辑，所以必须得先手动在 html 引入 `MyDll.alpha.js` 文件，再引入 `dist/main.js`。
+
+// TODO 后期得新开一篇文章讲解 DllReferencePlugin 的整体流程。
+
+## DependenciesBlock
+
+DependenciesBlock 是以上各种模块类的基类，它给这些模块增强了以下属性：
+
+```js
+class DependenciesBlock {
+  constructor() {
+    this.dependencies = []; // 当前模块的依赖
+    this.blocks = []; // 当前模块的代码分割点
+    this.variables = []; // 当前模块是否用了 __filename, __dirname, __resourceQuery, __webpack_amd_options__ 等内置变量
+  }
+}
+```
+
+比如模块 `index.js` 的内部结构如下：
+
+```js
+import './a.js' // dependencies 会有关于 a 模块的所有依赖
+
+import('./b.js') // blocks 上会存有 b 模块的异步分割 ImportDependenciesBlock
+
+var Query = __resourceQuery // variables 存有 __resourceQuery 的 dependenciesBlockVariable
+console.log(Query)
+```
 
 ## entryModule
 
-entryModule 比较特殊，与上述各种 module 不同，它不是一种独特类型的 module，仅仅代表当前 module 是程序的启动点，
+entryModule 比较特殊，与上述各种 module 不同，它不是一种**独特类型**的 module，仅仅代表当前 module 是程序的启动点。
 
 1. **字符串 entry 配置**
 
@@ -846,6 +1175,10 @@ entryModule 比较特殊，与上述各种 module 不同，它不是一种独特
   ```
 
   所以 entryModule 与前面数组、对象、字符串的情况一模一样。
+
+5. **使用了 DllPlugin 插件**
+
+  如果使用了 DllPlugin 插件，那么 entryModule 就是 webpack 内部的 dllModule，详细的例子可以[参考这里](#/dllmodule)
 
 ## 关于 module 的类
 
@@ -1377,8 +1710,6 @@ entryModule 比较特殊，与上述各种 module 不同，它不是一种独特
     Module.prototype.updateCacheModule = null;
     ```
     :::
-
-    基类。
 
 3. **NormalModule**
 
@@ -1990,8 +2321,6 @@ entryModule 比较特殊，与上述各种 module 不同，它不是一种独特
     ```
     :::
 
-    entry 配置为数组，会生成 MultiModule。
-
 5. **DllModule**
 
     :::details DllModule.js
@@ -2148,8 +2477,6 @@ entryModule 比较特殊，与上述各种 module 不同，它不是一种独特
     }
     ```
     :::
-
-    使用了 DllPlugin 插件，会用到第 5 和 第 6 两种 module。
 
 7. **ExternalModule**
 
@@ -2321,5 +2648,3 @@ entryModule 比较特殊，与上述各种 module 不同，它不是一种独特
     }
     ```
     :::
-
-    配置了 externals 的 module，都是 ExternalModule。
