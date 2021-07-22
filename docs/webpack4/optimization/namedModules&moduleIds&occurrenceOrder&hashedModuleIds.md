@@ -137,7 +137,8 @@ beforeModuleIds 和 moduleIds 这两个 hook 很关键，因为你可以改变 m
       // NormalModule.js
       class NormalModule {
         constructor() {
-          // 模块在用户系统上的绝对路径
+          // 模块在用户系统上的绝对路径，包含模块的 query
+          // 模块的 query 指的是 './a?x=1' 后面的 '?x=1'
           this.userRequest = ''
         }
         // 获取模块相对路径（相对于 context），举个例子
@@ -213,7 +214,7 @@ beforeModuleIds 和 moduleIds 这两个 hook 很关键，因为你可以改变 m
       class NormalModule {
         // 拼接了 loaders 请求, 比如 '/Users/webpack-demo/loader-a.js!/Users/webpack-demo/c.js'
         this.request = request;
-        // 当前模块在用户系统的绝对路径 比如 '/Users/webpack-demo/c.js'
+        // 当前模块在用户系统的绝对路径，包含 query，比如 '/Users/webpack-demo/c.js'
         this.userRequest = userRequest;
         // 代码中引入该模块的方式，比如 import './c.js'，那么就是 './c.js'
         this.rawRequest = rawRequest;
@@ -371,7 +372,7 @@ OccurrenceModuleOrderPlugin 的触发时机是在调用 compilation.seal 的时�
 
     内部 entryModule 的判断并不会要求 module 必须属于 initial chunk，因为可能存在一些特殊的场景。比如[这里的第 3 点涉及的场景](./removeEmptyChunks.html#handler)。
 
-    // TODO 补充一个链接，解释什么是 initial chunk，什么是 entryModule
+    什么是 initial chunk，什么是 entryModule，可以先阅读 [术语篇](../term/module.md)。
 
 - **步骤二：根据 prioritiseInitial 配置，计算 module 的权重，记录在 occursInInitialChunksMap**
 

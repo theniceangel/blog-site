@@ -27,6 +27,7 @@ module.exports = {
             '/webpack4/optimization/removeAvailableModules.md',
             '/webpack4/optimization/removeEmptyChunks.md',
             '/webpack4/optimization/mergeDuplicateChunks.md',
+            '/webpack4/optimization/flagIncludedChunks.md',
             '/webpack4/optimization/noEmitOnErrors.md',
             '/webpack4/optimization/nodeEnv.md',
             '/webpack4/optimization/namedModules&moduleIds&occurrenceOrder&hashedModuleIds.md',

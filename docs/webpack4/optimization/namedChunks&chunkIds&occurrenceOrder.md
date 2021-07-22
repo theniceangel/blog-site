@@ -207,6 +207,8 @@ const occursInInitialChunksMap = new Map();
   });
 ```
 
+什么是 chunkGroup、entrypoint，可以[👇这里](../term/entrypoint&chunkGroup.md)。
+
 // TODO 后期补充说明什么是 chunkGroup, entrypoint
 
 prioritiseInitial 主要是用来对比两个 chunk 被 initial chunk 引用的次数，什么是 initial chunk，举个例子：
