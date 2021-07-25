@@ -4,7 +4,7 @@
 
 ## chunkGroup
 
-根据 webpack 作者 [webpack 4: Code Splitting, chunk graph and the splitChunks optimization](https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366) 文章的描述，chunkGroup 的出现是为了解决以前 `CommonsChunkPlugin` 留下来的坑，以前 chunks 之间的联系都是通过父子关系来描述，这种关系很难阐释清除 `splitting chunk` 的关系，而 chunkGroup 的引入就是为了解决这种关系，entrypoint 或者 code splitting 都会生成对应的 chunkGoup 实例，如果使用了 [runtimeChunk](../optimization/runtimeChunk.md) 或者 [splitChunks](../optimization/splitChunks.md) 配置衍生出来的 chunk，就会连同原先的 chunk 保存在的chunkGroup 中，AggressiveSplittingPlugin 插件生成的 chunks 也是类似的原理。示意图如下：
+根据 webpack 作者 [webpack 4: Code Splitting, chunk graph and the splitChunks optimization](https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366) 文章的描述，chunkGroup 的出现是为了解决以前 `CommonsChunkPlugin` 留下来的坑，以前 chunks 之间的联系都是通过父子关系来描述，这种关系很难阐释清除 `splitting chunk` 的关系，而 chunkGroup 的引入就是为了解决这种关系，entrypoint 或者 code splitting 都会生成对应的 chunkGoup 实例，如果使用了 [runtimeChunk](../configuration/optimization/runtimeChunk.md) 或者 [splitChunks](../configuration/optimization/splitChunks.md) 配置衍生出来的 chunk，就会连同原先的 chunk 保存在的chunkGroup 中，AggressiveSplittingPlugin 插件生成的 chunks 也是类似的原理。示意图如下：
 
 <img :src="$withBase('/assets/chunkgroup-runtime.png')" width="600" />
 
@@ -541,7 +541,7 @@ class Entrypoint extends ChunkGroup {
 
 entrypoint 的生成受 webpack entry 配置的影响，如果是对象，那么会生成多个 entrypoints 和对应的 initial chunks，默认情况下 entrypoint 的 runtimeChunk 属性值就是这个对应的 initial chunk，因此 initial chunk 在生成代码的时候就会带有 [webpack boopstrap code](./chunk.md#runtime-chunk)
 
-isInitial 方法对于 Entrypoint 也是非常的关键，这个属性决定了是否要手动的在 html 文件通过 script 引入对应的 js 文件，这些 js 文件都是 Entrypoint 包含的 chunks 生成的，理解这一点，对你理解 [splitChunks](../optimization/splitChunks.md) 配置非常关键。
+isInitial 方法对于 Entrypoint 也是非常的关键，这个属性决定了是否要手动的在 html 文件通过 script 引入对应的 js 文件，这些 js 文件都是 Entrypoint 包含的 chunks 生成的，理解这一点，对你理解 [splitChunks](../configuration/optimization/splitChunks.md) 配置非常关键。
 
 **总而言之，webpack 内部 chunkGraph 的数量取决于代码分割的次数和 entry 配置**
 

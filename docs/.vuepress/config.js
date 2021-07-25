@@ -20,19 +20,53 @@ module.exports = {
           ]
         },
         {
+          text: 'tapable-1.1.3',
+          children: [
+            '/webpack4/tapable'
+          ]
+        },
+        {
+          text: '流程图',
+          children: [
+            '/webpack4/introduction/flow-diagram.md'
+          ]
+        },
+        {
+          text: '编译全流程',
+          children: [
+            '/webpack4/webpack-process/startup.md',
+            '/webpack4/webpack-process/handle-options.md',
+            '/webpack4/webpack-process/new-compiler.md',
+            '/webpack4/webpack-process/inner-plugins.md',
+            '/webpack4/webpack-process/run-compiler.md'
+          ]
+        },
+        {
+          text: 'mode',
+          children: [
+            '/webpack4/configuration/mode.md',
+          ],
+        },
+        {
           text: 'optimization',
           children: [
-            '/webpack4/optimization/splitChunks.md',
-            '/webpack4/optimization/runtimeChunk.md',
-            '/webpack4/optimization/removeAvailableModules.md',
-            '/webpack4/optimization/removeEmptyChunks.md',
-            '/webpack4/optimization/mergeDuplicateChunks.md',
-            '/webpack4/optimization/flagIncludedChunks.md',
-            '/webpack4/optimization/noEmitOnErrors.md',
-            '/webpack4/optimization/nodeEnv.md',
-            '/webpack4/optimization/namedModules&moduleIds&occurrenceOrder&hashedModuleIds.md',
-            '/webpack4/optimization/namedChunks&chunkIds&occurrenceOrder.md',
+            '/webpack4/configuration/optimization/splitChunks.md',
+            '/webpack4/configuration/optimization/runtimeChunk.md',
+            '/webpack4/configuration/optimization/removeAvailableModules.md',
+            '/webpack4/configuration/optimization/removeEmptyChunks.md',
+            '/webpack4/configuration/optimization/mergeDuplicateChunks.md',
+            '/webpack4/configuration/optimization/flagIncludedChunks.md',
+            '/webpack4/configuration/optimization/noEmitOnErrors.md',
+            '/webpack4/configuration/optimization/nodeEnv.md',
+            '/webpack4/configuration/optimization/namedModules&moduleIds&occurrenceOrder&hashedModuleIds.md',
+            '/webpack4/configuration/optimization/namedChunks&chunkIds&occurrenceOrder.md',
             
+          ],
+        },
+        {
+          text: 'infrastructureLogging',
+          children: [
+            '/webpack4/configuration/infrastructureLogging.md'
           ],
         }
       ]
@@ -55,7 +89,7 @@ module.exports = {
         text: 'webpack 源码合集',
         children: [
           {
-            text: 'v4',
+            text: 'v4.46.0',
             link: '/webpack4/README.md'
           },
           {
@@ -70,7 +104,7 @@ module.exports = {
     [
       '@vuepress/plugin-shiki',
       {
-        theme: 'dark-plus'
+        theme: 'github-dark'
       }
     ]
   ]

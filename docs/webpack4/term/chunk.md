@@ -26,7 +26,7 @@ module.exports = {
 
 可以看出 initial chunk 的生成是由入口 module 决定的，但是有没有其他的方式生成 initial chunk？
 
-**通过 [splitChunks](../optimization/splitChunks.md) 配置也可以生成 initial chunk。**
+**通过 [splitChunks](../configuration/optimization/splitChunks.md) 配置也可以生成 initial chunk。**
 
 换句话来说，**从 initial chunk 中分离出去的 modules 组成的 chunk，也是 initial chunk**，它们的特点是**需要自己手动通过 script 标签引入**，不过 HtmlWebpackPlugin 插件可以替你完成这些琐碎的任务，举个例子：
 
@@ -35,27 +35,27 @@ module.exports = {
 var path = require("path");
 
 module.exports = {
-	context: __dirname,
-	entry: {
-		index: "./index",
-	},
-	devtool: false,
-	optimization: {
-		minimize: false,
-		splitChunks: {
-			cacheGroups: { // 将 react 抽离出来
-				vendors: {
-					minChunks: 1,
-					chunks: 'initial',
-					minSize: 5000
-				}
-			}
-		}
-	},
-	output: {
-		path: path.join(__dirname, "dist"),
-		filename: "[name].js"
-	}
+  context: __dirname,
+  entry: {
+    index: "./index",
+  },
+  devtool: false,
+  optimization: {
+    minimize: false,
+    splitChunks: {
+      cacheGroups: { // 将 react 抽离出来
+        vendors: {
+          minChunks: 1,
+          chunks: 'initial',
+          minSize: 5000
+        }
+      }
+    }
+  },
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js"
+  }
 };
 ```
 :::
@@ -166,7 +166,7 @@ runtime chunk 指的是生成含有 webpack bootstrap 代码的 js 文件的 ch
 
 所以 chunk 可能同时是 initial 和 runtime chunk，比如上述的 `index chunk` 就是这种类型，它既含有 webpack bootstrap code，也含有所有 modules，modules 作为实参传给 bootstrap 函数。
 
-那么是否可以让 runtime chunk 变得更加 pure 一点么？[runtimeChunk](../optimization/runtimeChunk.md) 配置可以做到这点，原理就是 **modules 分离到另外的 chunk，单独把 bootstrap code 抽离至 runtime chunk**。
+那么是否可以让 runtime chunk 变得更加 pure 一点么？[runtimeChunk](../configuration/optimization/runtimeChunk.md) 配置可以做到这点，原理就是 **modules 分离到另外的 chunk，单独把 bootstrap code 抽离至 runtime chunk**。
 
 举个例子：
 
@@ -175,19 +175,19 @@ runtime chunk 指的是生成含有 webpack bootstrap 代码的 js 文件的 ch
 var path = require("path");
 
 module.exports = {
-	context: __dirname,
-	entry: {
-		index: "./index",
-	},
-	devtool: false,
-	optimization: {
-		minimize: false,
-		runtimeChunk: 'single'
-	},
-	output: {
-		path: path.join(__dirname, "dist"),
-		filename: "[name].js"
-	}
+  context: __dirname,
+  entry: {
+    index: "./index",
+  },
+  devtool: false,
+  optimization: {
+    minimize: false,
+    runtimeChunk: 'single'
+  },
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js"
+  }
 };
 ```
 :::
@@ -395,18 +395,18 @@ var path = require("path");
 
 module.exports = {
   mode: "development",
-	context: __dirname,
-	devtool: false,
-	entry: {
-		index: "./index",
-	},
-	optimization: {
-		minimize: false
-	},
-	output: {
-		path: path.join(__dirname, "dist"),
-		filename: "[name].js"
-	}
+  context: __dirname,
+  devtool: false,
+  entry: {
+    index: "./index",
+  },
+  optimization: {
+    minimize: false
+  },
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js"
+  }
 };
 ```
 :::
@@ -466,36 +466,36 @@ __webpack_require__.r(__webpack_exports__);
 ```
 :::
 
-与 initial chunk 类似，async chunk 也可以通过 [splitChunks](../optimization/splitChunks.md) 配置，从 async chunk 分离出来的 modules 组成的 newChunk 也属于 async 类型，姑且称之为**衍生品**，它的特点就是 **webpack 运行时会通过 script 加载所有的 async chunk 生成的 js，并且通过 Promise.all 等待所有文件加载完成**，对上述的例子做一点改造，修改 webpack.config.js 中的 cacheGroups 分组：
+与 initial chunk 类似，async chunk 也可以通过 [splitChunks](../configuration/optimization/splitChunks.md) 配置，从 async chunk 分离出来的 modules 组成的 newChunk 也属于 async 类型，姑且称之为**衍生品**，它的特点就是 **webpack 运行时会通过 script 加载所有的 async chunk 生成的 js，并且通过 Promise.all 等待所有文件加载完成**，对上述的例子做一点改造，修改 webpack.config.js 中的 cacheGroups 分组：
 
 :::details webpack.config.js
 ```js
 var path = require("path");
 
 module.exports = {
-	mode: "development",
-	context: __dirname,
-	devtool: false,
-	entry: {
-		index: "./index",
-	},
-	optimization: {
-		minimize: false,
-		splitChunks: {
-			cacheGroups: {
-				b: { // 将 module b 从 a async chunk 抽离至 b async chunk
-					test: path.resolve(__dirname, "b"),
-					name: "b",
-					priority: 2,
-					minSize: 30
-				}
-			}
-		}
-	},
-	output: {
-		path: path.join(__dirname, "dist"),
-		filename: "[name].js"
-	}
+  mode: "development",
+  context: __dirname,
+  devtool: false,
+  entry: {
+    index: "./index",
+  },
+  optimization: {
+    minimize: false,
+    splitChunks: {
+      cacheGroups: {
+        b: { // 将 module b 从 a async chunk 抽离至 b async chunk
+          test: path.resolve(__dirname, "b"),
+          name: "b",
+          priority: 2,
+          minSize: 30
+        }
+      }
+    }
+  },
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js"
+  }
 };
 ```
 :::
@@ -580,694 +580,694 @@ Promise.all(/*! import() | a */[__webpack_require__.e("b"), __webpack_require__.
     :::details Chunk.js
     ```js
     /**
-		 * A Chunk is a unit of encapsulation for Modules.
-		* Chunks are "rendered" into bundles that get emitted when the build completes.
-		*/
-		class Chunk {
-			/**
-			* @param {string=} name of chunk being created, is optional (for subclasses)
-			*/
-			constructor(name) {
-				/** @type {number | null} */
-				this.id = null;
-				/** @type {number[] | null} */
-				this.ids = null;
-				/** @type {number} */
-				this.debugId = debugId++;
-				/** @type {string} */
-				this.name = name;
-				/** @type {boolean} */
-				this.preventIntegration = false;
-				/** @type {Module=} */
-				this.entryModule = undefined;
-				/** @private @type {SortableSet<Module>} */
-				this._modules = new SortableSet(undefined, sortByIdentifier);
-				/** @type {string?} */
-				this.filenameTemplate = undefined;
-				/** @private @type {SortableSet<ChunkGroup>} */
-				this._groups = new SortableSet(undefined, sortChunkGroupById);
-				/** @type {string[]} */
-				this.files = [];
-				/** @type {boolean} */
-				this.rendered = false;
-				/** @type {string=} */
-				this.hash = undefined;
-				/** @type {Object} */
-				this.contentHash = Object.create(null);
-				/** @type {string=} */
-				this.renderedHash = undefined;
-				/** @type {string=} */
-				this.chunkReason = undefined;
-				/** @type {boolean} */
-				this.extraAsync = false;
-				this.removedModules = undefined;
-			}
-
-			/**
-			* @deprecated Chunk.entry has been deprecated. Please use .hasRuntime() instead
-			* @returns {never} Throws an error trying to access this property
-			*/
-			get entry() {
-				throw new Error(ERR_CHUNK_ENTRY);
-			}
-
-			/**
-			* @deprecated .entry has been deprecated. Please use .hasRuntime() instead
-			* @param {never} data The data that was attempting to be set
-			* @returns {never} Throws an error trying to access this property
-			*/
-			set entry(data) {
-				throw new Error(ERR_CHUNK_ENTRY);
-			}
-
-			/**
-			* @deprecated Chunk.initial was removed. Use canBeInitial/isOnlyInitial()
-			* @returns {never} Throws an error trying to access this property
-			*/
-			get initial() {
-				throw new Error(ERR_CHUNK_INITIAL);
-			}
-
-			/**
-			* @deprecated Chunk.initial was removed. Use canBeInitial/isOnlyInitial()
-			* @param {never} data The data attempting to be set
-			* @returns {never} Throws an error trying to access this property
-			*/
-			set initial(data) {
-				throw new Error(ERR_CHUNK_INITIAL);
-			}
-
-			/**
-			* @returns {boolean} whether or not the Chunk will have a runtime
-			*/
-			hasRuntime() {
-				for (const chunkGroup of this._groups) {
-					if (
-						chunkGroup.isInitial() &&
-						chunkGroup instanceof Entrypoint &&
-						chunkGroup.getRuntimeChunk() === this
-					) {
-						return true;
-					}
-				}
-				return false;
-			}
-
-			/**
-			* @returns {boolean} whether or not this chunk can be an initial chunk
-			*/
-			canBeInitial() {
-				for (const chunkGroup of this._groups) {
-					if (chunkGroup.isInitial()) return true;
-				}
-				return false;
-			}
-
-			/**
-			* @returns {boolean} whether this chunk can only be an initial chunk
-			*/
-			isOnlyInitial() {
-				if (this._groups.size <= 0) return false;
-				for (const chunkGroup of this._groups) {
-					if (!chunkGroup.isInitial()) return false;
-				}
-				return true;
-			}
-
-			/**
-			* @returns {boolean} if this chunk contains the entry module
-			*/
-			hasEntryModule() {
-				return !!this.entryModule;
-			}
-
-			/**
-			* @param {Module} module the module that will be added to this chunk.
-			* @returns {boolean} returns true if the chunk doesn't have the module and it was added
-			*/
-			addModule(module) {
-				if (!this._modules.has(module)) {
-					this._modules.add(module);
-					return true;
-				}
-				return false;
-			}
-
-			/**
-			* @param {Module} module the module that will be removed from this chunk
-			* @returns {boolean} returns true if chunk exists and is successfully deleted
-			*/
-			removeModule(module) {
-				if (this._modules.delete(module)) {
-					module.removeChunk(this);
-					return true;
-				}
-				return false;
-			}
-
-			/**
-			* @param {Module[]} modules the new modules to be set
-			* @returns {void} set new modules to this chunk and return nothing
-			*/
-			setModules(modules) {
-				this._modules = new SortableSet(modules, sortByIdentifier);
-			}
-
-			/**
-			* @returns {number} the amount of modules in chunk
-			*/
-			getNumberOfModules() {
-				return this._modules.size;
-			}
-
-			/**
-			* @returns {SortableSet} return the modules SortableSet for this chunk
-			*/
-			get modulesIterable() {
-				return this._modules;
-			}
-
-			/**
-			* @param {ChunkGroup} chunkGroup the chunkGroup the chunk is being added
-			* @returns {boolean} returns true if chunk is not apart of chunkGroup and is added successfully
-			*/
-			addGroup(chunkGroup) {
-				if (this._groups.has(chunkGroup)) return false;
-				this._groups.add(chunkGroup);
-				return true;
-			}
-
-			/**
-			* @param {ChunkGroup} chunkGroup the chunkGroup the chunk is being removed from
-			* @returns {boolean} returns true if chunk does exist in chunkGroup and is removed
-			*/
-			removeGroup(chunkGroup) {
-				if (!this._groups.has(chunkGroup)) return false;
-				this._groups.delete(chunkGroup);
-				return true;
-			}
-
-			/**
-			* @param {ChunkGroup} chunkGroup the chunkGroup to check
-			* @returns {boolean} returns true if chunk has chunkGroup reference and exists in chunkGroup
-			*/
-			isInGroup(chunkGroup) {
-				return this._groups.has(chunkGroup);
-			}
-
-			/**
-			* @returns {number} the amount of groups said chunk is in
-			*/
-			getNumberOfGroups() {
-				return this._groups.size;
-			}
-
-			/**
-			* @returns {SortableSet<ChunkGroup>} the chunkGroups that said chunk is referenced in
-			*/
-			get groupsIterable() {
-				return this._groups;
-			}
-
-			/**
-			* @param {Chunk} otherChunk the chunk to compare itself with
-			* @returns {-1|0|1} this is a comparitor function like sort and returns -1, 0, or 1 based on sort order
-			*/
-			compareTo(otherChunk) {
-				if (this.name && !otherChunk.name) return -1;
-				if (!this.name && otherChunk.name) return 1;
-				if (this.name < otherChunk.name) return -1;
-				if (this.name > otherChunk.name) return 1;
-				if (this._modules.size > otherChunk._modules.size) return -1;
-				if (this._modules.size < otherChunk._modules.size) return 1;
-				this._modules.sort();
-				otherChunk._modules.sort();
-				const a = this._modules[Symbol.iterator]();
-				const b = otherChunk._modules[Symbol.iterator]();
-				// eslint-disable-next-line no-constant-condition
-				while (true) {
-					const aItem = a.next();
-					if (aItem.done) return 0;
-					const bItem = b.next();
-					const aModuleIdentifier = aItem.value.identifier();
-					const bModuleIdentifier = bItem.value.identifier();
-					if (aModuleIdentifier < bModuleIdentifier) return -1;
-					if (aModuleIdentifier > bModuleIdentifier) return 1;
-				}
-			}
-
-			/**
-			* @param {Module} module Module to check
-			* @returns {boolean} returns true if module does exist in this chunk
-			*/
-			containsModule(module) {
-				return this._modules.has(module);
-			}
-
-			/**
-			* @returns {Module[]} an array of modules (do not modify)
-			*/
-			getModules() {
-				return this._modules.getFromCache(getArray);
-			}
-
-			getModulesIdent() {
-				return this._modules.getFromUnorderedCache(getModulesIdent);
-			}
-
-			/**
-			* @param {string=} reason reason why chunk is removed
-			* @returns {void}
-			*/
-			remove(reason) {
-				// cleanup modules
-				// Array.from is used here to create a clone, because removeChunk modifies this._modules
-				for (const module of Array.from(this._modules)) {
-					module.removeChunk(this);
-				}
-				for (const chunkGroup of this._groups) {
-					chunkGroup.removeChunk(this);
-				}
-			}
-
-			/**
-			*
-			* @param {Module} module module to move
-			* @param {Chunk} otherChunk other chunk to move it to
-			* @returns {void}
-			*/
-			moveModule(module, otherChunk) {
-				GraphHelpers.disconnectChunkAndModule(this, module);
-				GraphHelpers.connectChunkAndModule(otherChunk, module);
-				module.rewriteChunkInReasons(this, [otherChunk]);
-			}
-
-			/**
-			*
-			* @param {Chunk} otherChunk the chunk to integrate with
-			* @param {string} reason reason why the module is being integrated
-			* @returns {boolean} returns true or false if integration succeeds or fails
-			*/
-			integrate(otherChunk, reason) {
-				if (!this.canBeIntegrated(otherChunk)) {
-					return false;
-				}
-
-				// Pick a new name for the integrated chunk
-				if (this.name && otherChunk.name) {
-					if (this.hasEntryModule() === otherChunk.hasEntryModule()) {
-						// When both chunks have entry modules or none have one, use
-						// shortest name
-						if (this.name.length !== otherChunk.name.length) {
-							this.name =
-								this.name.length < otherChunk.name.length
-									? this.name
-									: otherChunk.name;
-						} else {
-							this.name = this.name < otherChunk.name ? this.name : otherChunk.name;
-						}
-					} else if (otherChunk.hasEntryModule()) {
-						// Pick the name of the chunk with the entry module
-						this.name = otherChunk.name;
-					}
-				} else if (otherChunk.name) {
-					this.name = otherChunk.name;
-				}
-
-				// Array.from is used here to create a clone, because moveModule modifies otherChunk._modules
-				for (const module of Array.from(otherChunk._modules)) {
-					otherChunk.moveModule(module, this);
-				}
-				otherChunk._modules.clear();
-
-				if (otherChunk.entryModule) {
-					this.entryModule = otherChunk.entryModule;
-				}
-
-				for (const chunkGroup of otherChunk._groups) {
-					chunkGroup.replaceChunk(otherChunk, this);
-					this.addGroup(chunkGroup);
-				}
-				otherChunk._groups.clear();
-
-				return true;
-			}
-
-			/**
-			* @param {Chunk} newChunk the new chunk that will be split out of the current chunk
-			* @returns {void}
-			*/
-			split(newChunk) {
-				for (const chunkGroup of this._groups) {
-					chunkGroup.insertChunk(newChunk, this);
-					newChunk.addGroup(chunkGroup);
-				}
-			}
-
-			isEmpty() {
-				return this._modules.size === 0;
-			}
-
-			updateHash(hash) {
-				hash.update(`${this.id} `);
-				hash.update(this.ids ? this.ids.join(",") : "");
-				hash.update(`${this.name || ""} `);
-				for (const m of this._modules) {
-					hash.update(m.hash);
-				}
-			}
-
-			canBeIntegrated(otherChunk) {
-				if (this.preventIntegration || otherChunk.preventIntegration) {
-					return false;
-				}
-
-				/**
-				* @param {Chunk} a chunk
-				* @param {Chunk} b chunk
-				* @returns {boolean} true, if a is always available when b is reached
-				*/
-				const isAvailable = (a, b) => {
-					const queue = new Set(b.groupsIterable);
-					for (const chunkGroup of queue) {
-						if (a.isInGroup(chunkGroup)) continue;
-						if (chunkGroup.isInitial()) return false;
-						for (const parent of chunkGroup.parentsIterable) {
-							queue.add(parent);
-						}
-					}
-					return true;
-				};
-
-				const selfHasRuntime = this.hasRuntime();
-				const otherChunkHasRuntime = otherChunk.hasRuntime();
-
-				if (selfHasRuntime !== otherChunkHasRuntime) {
-					if (selfHasRuntime) {
-						return isAvailable(this, otherChunk);
-					} else if (otherChunkHasRuntime) {
-						return isAvailable(otherChunk, this);
-					} else {
-						return false;
-					}
-				}
-
-				if (this.hasEntryModule() || otherChunk.hasEntryModule()) {
-					return false;
-				}
-
-				return true;
-			}
-
-			/**
-			*
-			* @param {number} size the size
-			* @param {Object} options the options passed in
-			* @returns {number} the multiplier returned
-			*/
-			addMultiplierAndOverhead(size, options) {
-				const overhead =
-					typeof options.chunkOverhead === "number" ? options.chunkOverhead : 10000;
-				const multiplicator = this.canBeInitial()
-					? options.entryChunkMultiplicator || 10
-					: 1;
-
-				return size * multiplicator + overhead;
-			}
-
-			/**
-			* @returns {number} the size of all modules
-			*/
-			modulesSize() {
-				return this._modules.getFromUnorderedCache(getModulesSize);
-			}
-
-			/**
-			* @param {Object} options the size display options
-			* @returns {number} the chunk size
-			*/
-			size(options = {}) {
-				return this.addMultiplierAndOverhead(this.modulesSize(), options);
-			}
-
-			/**
-			* @param {Chunk} otherChunk the other chunk
-			* @param {TODO} options the options for this function
-			* @returns {number | false} the size, or false if it can't be integrated
-			*/
-			integratedSize(otherChunk, options) {
-				// Chunk if it's possible to integrate this chunk
-				if (!this.canBeIntegrated(otherChunk)) {
-					return false;
-				}
-
-				let integratedModulesSize = this.modulesSize();
-				// only count modules that do not exist in this chunk!
-				for (const otherModule of otherChunk._modules) {
-					if (!this._modules.has(otherModule)) {
-						integratedModulesSize += otherModule.size();
-					}
-				}
-
-				return this.addMultiplierAndOverhead(integratedModulesSize, options);
-			}
-
-			/**
-			* @param {function(Module, Module): -1|0|1=} sortByFn a predicate function used to sort modules
-			* @returns {void}
-			*/
-			sortModules(sortByFn) {
-				this._modules.sortWith(sortByFn || sortModuleById);
-			}
-
-			sortItems() {
-				this.sortModules();
-			}
-
-			/**
-			* @returns {Set<Chunk>} a set of all the async chunks
-			*/
-			getAllAsyncChunks() {
-				const queue = new Set();
-				const chunks = new Set();
-
-				const initialChunks = intersect(
-					Array.from(this.groupsIterable, g => new Set(g.chunks))
-				);
-
-				for (const chunkGroup of this.groupsIterable) {
-					for (const child of chunkGroup.childrenIterable) {
-						queue.add(child);
-					}
-				}
-
-				for (const chunkGroup of queue) {
-					for (const chunk of chunkGroup.chunks) {
-						if (!initialChunks.has(chunk)) {
-							chunks.add(chunk);
-						}
-					}
-					for (const child of chunkGroup.childrenIterable) {
-						queue.add(child);
-					}
-				}
-
-				return chunks;
-			}
-
-			/**
-			* @typedef {Object} ChunkMaps
-			* @property {Record<string|number, string>} hash
-			* @property {Record<string|number, Record<string, string>>} contentHash
-			* @property {Record<string|number, string>} name
-			*/
-
-			/**
-			* @param {boolean} realHash should the full hash or the rendered hash be used
-			* @returns {ChunkMaps} the chunk map information
-			*/
-			getChunkMaps(realHash) {
-				/** @type {Record<string|number, string>} */
-				const chunkHashMap = Object.create(null);
-				/** @type {Record<string|number, Record<string, string>>} */
-				const chunkContentHashMap = Object.create(null);
-				/** @type {Record<string|number, string>} */
-				const chunkNameMap = Object.create(null);
-
-				for (const chunk of this.getAllAsyncChunks()) {
-					chunkHashMap[chunk.id] = realHash ? chunk.hash : chunk.renderedHash;
-					for (const key of Object.keys(chunk.contentHash)) {
-						if (!chunkContentHashMap[key]) {
-							chunkContentHashMap[key] = Object.create(null);
-						}
-						chunkContentHashMap[key][chunk.id] = chunk.contentHash[key];
-					}
-					if (chunk.name) {
-						chunkNameMap[chunk.id] = chunk.name;
-					}
-				}
-
-				return {
-					hash: chunkHashMap,
-					contentHash: chunkContentHashMap,
-					name: chunkNameMap
-				};
-			}
-
-			/**
-			* @returns {Record<string, Set<TODO>[]>} a record object of names to lists of child ids(?)
-			*/
-			getChildIdsByOrders() {
-				const lists = new Map();
-				for (const group of this.groupsIterable) {
-					if (group.chunks[group.chunks.length - 1] === this) {
-						for (const childGroup of group.childrenIterable) {
-							// TODO webpack 5 remove this check for options
-							if (typeof childGroup.options === "object") {
-								for (const key of Object.keys(childGroup.options)) {
-									if (key.endsWith("Order")) {
-										const name = key.substr(0, key.length - "Order".length);
-										let list = lists.get(name);
-										if (list === undefined) lists.set(name, (list = []));
-										list.push({
-											order: childGroup.options[key],
-											group: childGroup
-										});
-									}
-								}
-							}
-						}
-					}
-				}
-				const result = Object.create(null);
-				for (const [name, list] of lists) {
-					list.sort((a, b) => {
-						const cmp = b.order - a.order;
-						if (cmp !== 0) return cmp;
-						// TODO webpack 5 remove this check of compareTo
-						if (a.group.compareTo) {
-							return a.group.compareTo(b.group);
-						}
-						return 0;
-					});
-					result[name] = Array.from(
-						list.reduce((set, item) => {
-							for (const chunk of item.group.chunks) {
-								set.add(chunk.id);
-							}
-							return set;
-						}, new Set())
-					);
-				}
-				return result;
-			}
-
-			getChildIdsByOrdersMap(includeDirectChildren) {
-				const chunkMaps = Object.create(null);
-
-				const addChildIdsByOrdersToMap = chunk => {
-					const data = chunk.getChildIdsByOrders();
-					for (const key of Object.keys(data)) {
-						let chunkMap = chunkMaps[key];
-						if (chunkMap === undefined) {
-							chunkMaps[key] = chunkMap = Object.create(null);
-						}
-						chunkMap[chunk.id] = data[key];
-					}
-				};
-
-				if (includeDirectChildren) {
-					const chunks = new Set();
-					for (const chunkGroup of this.groupsIterable) {
-						for (const chunk of chunkGroup.chunks) {
-							chunks.add(chunk);
-						}
-					}
-					for (const chunk of chunks) {
-						addChildIdsByOrdersToMap(chunk);
-					}
-				}
-
-				for (const chunk of this.getAllAsyncChunks()) {
-					addChildIdsByOrdersToMap(chunk);
-				}
-
-				return chunkMaps;
-			}
-
-			/**
-			* @typedef {Object} ChunkModuleMaps
-			* @property {Record<string|number, (string|number)[]>} id
-			* @property {Record<string|number, string>} hash
-			*/
-
-			/**
-			* @param {ModuleFilterPredicate} filterFn function used to filter modules
-			* @returns {ChunkModuleMaps} module map information
-			*/
-			getChunkModuleMaps(filterFn) {
-				/** @type {Record<string|number, (string|number)[]>} */
-				const chunkModuleIdMap = Object.create(null);
-				/** @type {Record<string|number, string>} */
-				const chunkModuleHashMap = Object.create(null);
-
-				for (const chunk of this.getAllAsyncChunks()) {
-					/** @type {(string|number)[]} */
-					let array;
-					for (const module of chunk.modulesIterable) {
-						if (filterFn(module)) {
-							if (array === undefined) {
-								array = [];
-								chunkModuleIdMap[chunk.id] = array;
-							}
-							array.push(module.id);
-							chunkModuleHashMap[module.id] = module.renderedHash;
-						}
-					}
-					if (array !== undefined) {
-						array.sort();
-					}
-				}
-
-				return {
-					id: chunkModuleIdMap,
-					hash: chunkModuleHashMap
-				};
-			}
-
-			/**
-			*
-			* @param {function(Module): boolean} filterFn predicate function used to filter modules
-			* @param {function(Chunk): boolean} filterChunkFn predicate function used to filter chunks
-			* @returns {boolean} return true if module exists in graph
-			*/
-			hasModuleInGraph(filterFn, filterChunkFn) {
-				const queue = new Set(this.groupsIterable);
-				const chunksProcessed = new Set();
-
-				for (const chunkGroup of queue) {
-					for (const chunk of chunkGroup.chunks) {
-						if (!chunksProcessed.has(chunk)) {
-							chunksProcessed.add(chunk);
-							if (!filterChunkFn || filterChunkFn(chunk)) {
-								for (const module of chunk.modulesIterable) {
-									if (filterFn(module)) {
-										return true;
-									}
-								}
-							}
-						}
-					}
-					for (const child of chunkGroup.childrenIterable) {
-						queue.add(child);
-					}
-				}
-				return false;
-			}
-
-			toString() {
-				return `Chunk[${Array.from(this._modules).join()}]`;
-			}
-		}
+     * A Chunk is a unit of encapsulation for Modules.
+    * Chunks are "rendered" into bundles that get emitted when the build completes.
+    */
+    class Chunk {
+      /**
+      * @param {string=} name of chunk being created, is optional (for subclasses)
+      */
+      constructor(name) {
+        /** @type {number | null} */
+        this.id = null;
+        /** @type {number[] | null} */
+        this.ids = null;
+        /** @type {number} */
+        this.debugId = debugId++;
+        /** @type {string} */
+        this.name = name;
+        /** @type {boolean} */
+        this.preventIntegration = false;
+        /** @type {Module=} */
+        this.entryModule = undefined;
+        /** @private @type {SortableSet<Module>} */
+        this._modules = new SortableSet(undefined, sortByIdentifier);
+        /** @type {string?} */
+        this.filenameTemplate = undefined;
+        /** @private @type {SortableSet<ChunkGroup>} */
+        this._groups = new SortableSet(undefined, sortChunkGroupById);
+        /** @type {string[]} */
+        this.files = [];
+        /** @type {boolean} */
+        this.rendered = false;
+        /** @type {string=} */
+        this.hash = undefined;
+        /** @type {Object} */
+        this.contentHash = Object.create(null);
+        /** @type {string=} */
+        this.renderedHash = undefined;
+        /** @type {string=} */
+        this.chunkReason = undefined;
+        /** @type {boolean} */
+        this.extraAsync = false;
+        this.removedModules = undefined;
+      }
+
+      /**
+      * @deprecated Chunk.entry has been deprecated. Please use .hasRuntime() instead
+      * @returns {never} Throws an error trying to access this property
+      */
+      get entry() {
+        throw new Error(ERR_CHUNK_ENTRY);
+      }
+
+      /**
+      * @deprecated .entry has been deprecated. Please use .hasRuntime() instead
+      * @param {never} data The data that was attempting to be set
+      * @returns {never} Throws an error trying to access this property
+      */
+      set entry(data) {
+        throw new Error(ERR_CHUNK_ENTRY);
+      }
+
+      /**
+      * @deprecated Chunk.initial was removed. Use canBeInitial/isOnlyInitial()
+      * @returns {never} Throws an error trying to access this property
+      */
+      get initial() {
+        throw new Error(ERR_CHUNK_INITIAL);
+      }
+
+      /**
+      * @deprecated Chunk.initial was removed. Use canBeInitial/isOnlyInitial()
+      * @param {never} data The data attempting to be set
+      * @returns {never} Throws an error trying to access this property
+      */
+      set initial(data) {
+        throw new Error(ERR_CHUNK_INITIAL);
+      }
+
+      /**
+      * @returns {boolean} whether or not the Chunk will have a runtime
+      */
+      hasRuntime() {
+        for (const chunkGroup of this._groups) {
+          if (
+            chunkGroup.isInitial() &&
+            chunkGroup instanceof Entrypoint &&
+            chunkGroup.getRuntimeChunk() === this
+          ) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      /**
+      * @returns {boolean} whether or not this chunk can be an initial chunk
+      */
+      canBeInitial() {
+        for (const chunkGroup of this._groups) {
+          if (chunkGroup.isInitial()) return true;
+        }
+        return false;
+      }
+
+      /**
+      * @returns {boolean} whether this chunk can only be an initial chunk
+      */
+      isOnlyInitial() {
+        if (this._groups.size <= 0) return false;
+        for (const chunkGroup of this._groups) {
+          if (!chunkGroup.isInitial()) return false;
+        }
+        return true;
+      }
+
+      /**
+      * @returns {boolean} if this chunk contains the entry module
+      */
+      hasEntryModule() {
+        return !!this.entryModule;
+      }
+
+      /**
+      * @param {Module} module the module that will be added to this chunk.
+      * @returns {boolean} returns true if the chunk doesn't have the module and it was added
+      */
+      addModule(module) {
+        if (!this._modules.has(module)) {
+          this._modules.add(module);
+          return true;
+        }
+        return false;
+      }
+
+      /**
+      * @param {Module} module the module that will be removed from this chunk
+      * @returns {boolean} returns true if chunk exists and is successfully deleted
+      */
+      removeModule(module) {
+        if (this._modules.delete(module)) {
+          module.removeChunk(this);
+          return true;
+        }
+        return false;
+      }
+
+      /**
+      * @param {Module[]} modules the new modules to be set
+      * @returns {void} set new modules to this chunk and return nothing
+      */
+      setModules(modules) {
+        this._modules = new SortableSet(modules, sortByIdentifier);
+      }
+
+      /**
+      * @returns {number} the amount of modules in chunk
+      */
+      getNumberOfModules() {
+        return this._modules.size;
+      }
+
+      /**
+      * @returns {SortableSet} return the modules SortableSet for this chunk
+      */
+      get modulesIterable() {
+        return this._modules;
+      }
+
+      /**
+      * @param {ChunkGroup} chunkGroup the chunkGroup the chunk is being added
+      * @returns {boolean} returns true if chunk is not apart of chunkGroup and is added successfully
+      */
+      addGroup(chunkGroup) {
+        if (this._groups.has(chunkGroup)) return false;
+        this._groups.add(chunkGroup);
+        return true;
+      }
+
+      /**
+      * @param {ChunkGroup} chunkGroup the chunkGroup the chunk is being removed from
+      * @returns {boolean} returns true if chunk does exist in chunkGroup and is removed
+      */
+      removeGroup(chunkGroup) {
+        if (!this._groups.has(chunkGroup)) return false;
+        this._groups.delete(chunkGroup);
+        return true;
+      }
+
+      /**
+      * @param {ChunkGroup} chunkGroup the chunkGroup to check
+      * @returns {boolean} returns true if chunk has chunkGroup reference and exists in chunkGroup
+      */
+      isInGroup(chunkGroup) {
+        return this._groups.has(chunkGroup);
+      }
+
+      /**
+      * @returns {number} the amount of groups said chunk is in
+      */
+      getNumberOfGroups() {
+        return this._groups.size;
+      }
+
+      /**
+      * @returns {SortableSet<ChunkGroup>} the chunkGroups that said chunk is referenced in
+      */
+      get groupsIterable() {
+        return this._groups;
+      }
+
+      /**
+      * @param {Chunk} otherChunk the chunk to compare itself with
+      * @returns {-1|0|1} this is a comparitor function like sort and returns -1, 0, or 1 based on sort order
+      */
+      compareTo(otherChunk) {
+        if (this.name && !otherChunk.name) return -1;
+        if (!this.name && otherChunk.name) return 1;
+        if (this.name < otherChunk.name) return -1;
+        if (this.name > otherChunk.name) return 1;
+        if (this._modules.size > otherChunk._modules.size) return -1;
+        if (this._modules.size < otherChunk._modules.size) return 1;
+        this._modules.sort();
+        otherChunk._modules.sort();
+        const a = this._modules[Symbol.iterator]();
+        const b = otherChunk._modules[Symbol.iterator]();
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const aItem = a.next();
+          if (aItem.done) return 0;
+          const bItem = b.next();
+          const aModuleIdentifier = aItem.value.identifier();
+          const bModuleIdentifier = bItem.value.identifier();
+          if (aModuleIdentifier < bModuleIdentifier) return -1;
+          if (aModuleIdentifier > bModuleIdentifier) return 1;
+        }
+      }
+
+      /**
+      * @param {Module} module Module to check
+      * @returns {boolean} returns true if module does exist in this chunk
+      */
+      containsModule(module) {
+        return this._modules.has(module);
+      }
+
+      /**
+      * @returns {Module[]} an array of modules (do not modify)
+      */
+      getModules() {
+        return this._modules.getFromCache(getArray);
+      }
+
+      getModulesIdent() {
+        return this._modules.getFromUnorderedCache(getModulesIdent);
+      }
+
+      /**
+      * @param {string=} reason reason why chunk is removed
+      * @returns {void}
+      */
+      remove(reason) {
+        // cleanup modules
+        // Array.from is used here to create a clone, because removeChunk modifies this._modules
+        for (const module of Array.from(this._modules)) {
+          module.removeChunk(this);
+        }
+        for (const chunkGroup of this._groups) {
+          chunkGroup.removeChunk(this);
+        }
+      }
+
+      /**
+      *
+      * @param {Module} module module to move
+      * @param {Chunk} otherChunk other chunk to move it to
+      * @returns {void}
+      */
+      moveModule(module, otherChunk) {
+        GraphHelpers.disconnectChunkAndModule(this, module);
+        GraphHelpers.connectChunkAndModule(otherChunk, module);
+        module.rewriteChunkInReasons(this, [otherChunk]);
+      }
+
+      /**
+      *
+      * @param {Chunk} otherChunk the chunk to integrate with
+      * @param {string} reason reason why the module is being integrated
+      * @returns {boolean} returns true or false if integration succeeds or fails
+      */
+      integrate(otherChunk, reason) {
+        if (!this.canBeIntegrated(otherChunk)) {
+          return false;
+        }
+
+        // Pick a new name for the integrated chunk
+        if (this.name && otherChunk.name) {
+          if (this.hasEntryModule() === otherChunk.hasEntryModule()) {
+            // When both chunks have entry modules or none have one, use
+            // shortest name
+            if (this.name.length !== otherChunk.name.length) {
+              this.name =
+                this.name.length < otherChunk.name.length
+                  ? this.name
+                  : otherChunk.name;
+            } else {
+              this.name = this.name < otherChunk.name ? this.name : otherChunk.name;
+            }
+          } else if (otherChunk.hasEntryModule()) {
+            // Pick the name of the chunk with the entry module
+            this.name = otherChunk.name;
+          }
+        } else if (otherChunk.name) {
+          this.name = otherChunk.name;
+        }
+
+        // Array.from is used here to create a clone, because moveModule modifies otherChunk._modules
+        for (const module of Array.from(otherChunk._modules)) {
+          otherChunk.moveModule(module, this);
+        }
+        otherChunk._modules.clear();
+
+        if (otherChunk.entryModule) {
+          this.entryModule = otherChunk.entryModule;
+        }
+
+        for (const chunkGroup of otherChunk._groups) {
+          chunkGroup.replaceChunk(otherChunk, this);
+          this.addGroup(chunkGroup);
+        }
+        otherChunk._groups.clear();
+
+        return true;
+      }
+
+      /**
+      * @param {Chunk} newChunk the new chunk that will be split out of the current chunk
+      * @returns {void}
+      */
+      split(newChunk) {
+        for (const chunkGroup of this._groups) {
+          chunkGroup.insertChunk(newChunk, this);
+          newChunk.addGroup(chunkGroup);
+        }
+      }
+
+      isEmpty() {
+        return this._modules.size === 0;
+      }
+
+      updateHash(hash) {
+        hash.update(`${this.id} `);
+        hash.update(this.ids ? this.ids.join(",") : "");
+        hash.update(`${this.name || ""} `);
+        for (const m of this._modules) {
+          hash.update(m.hash);
+        }
+      }
+
+      canBeIntegrated(otherChunk) {
+        if (this.preventIntegration || otherChunk.preventIntegration) {
+          return false;
+        }
+
+        /**
+        * @param {Chunk} a chunk
+        * @param {Chunk} b chunk
+        * @returns {boolean} true, if a is always available when b is reached
+        */
+        const isAvailable = (a, b) => {
+          const queue = new Set(b.groupsIterable);
+          for (const chunkGroup of queue) {
+            if (a.isInGroup(chunkGroup)) continue;
+            if (chunkGroup.isInitial()) return false;
+            for (const parent of chunkGroup.parentsIterable) {
+              queue.add(parent);
+            }
+          }
+          return true;
+        };
+
+        const selfHasRuntime = this.hasRuntime();
+        const otherChunkHasRuntime = otherChunk.hasRuntime();
+
+        if (selfHasRuntime !== otherChunkHasRuntime) {
+          if (selfHasRuntime) {
+            return isAvailable(this, otherChunk);
+          } else if (otherChunkHasRuntime) {
+            return isAvailable(otherChunk, this);
+          } else {
+            return false;
+          }
+        }
+
+        if (this.hasEntryModule() || otherChunk.hasEntryModule()) {
+          return false;
+        }
+
+        return true;
+      }
+
+      /**
+      *
+      * @param {number} size the size
+      * @param {Object} options the options passed in
+      * @returns {number} the multiplier returned
+      */
+      addMultiplierAndOverhead(size, options) {
+        const overhead =
+          typeof options.chunkOverhead === "number" ? options.chunkOverhead : 10000;
+        const multiplicator = this.canBeInitial()
+          ? options.entryChunkMultiplicator || 10
+          : 1;
+
+        return size * multiplicator + overhead;
+      }
+
+      /**
+      * @returns {number} the size of all modules
+      */
+      modulesSize() {
+        return this._modules.getFromUnorderedCache(getModulesSize);
+      }
+
+      /**
+      * @param {Object} options the size display options
+      * @returns {number} the chunk size
+      */
+      size(options = {}) {
+        return this.addMultiplierAndOverhead(this.modulesSize(), options);
+      }
+
+      /**
+      * @param {Chunk} otherChunk the other chunk
+      * @param {TODO} options the options for this function
+      * @returns {number | false} the size, or false if it can't be integrated
+      */
+      integratedSize(otherChunk, options) {
+        // Chunk if it's possible to integrate this chunk
+        if (!this.canBeIntegrated(otherChunk)) {
+          return false;
+        }
+
+        let integratedModulesSize = this.modulesSize();
+        // only count modules that do not exist in this chunk!
+        for (const otherModule of otherChunk._modules) {
+          if (!this._modules.has(otherModule)) {
+            integratedModulesSize += otherModule.size();
+          }
+        }
+
+        return this.addMultiplierAndOverhead(integratedModulesSize, options);
+      }
+
+      /**
+      * @param {function(Module, Module): -1|0|1=} sortByFn a predicate function used to sort modules
+      * @returns {void}
+      */
+      sortModules(sortByFn) {
+        this._modules.sortWith(sortByFn || sortModuleById);
+      }
+
+      sortItems() {
+        this.sortModules();
+      }
+
+      /**
+      * @returns {Set<Chunk>} a set of all the async chunks
+      */
+      getAllAsyncChunks() {
+        const queue = new Set();
+        const chunks = new Set();
+
+        const initialChunks = intersect(
+          Array.from(this.groupsIterable, g => new Set(g.chunks))
+        );
+
+        for (const chunkGroup of this.groupsIterable) {
+          for (const child of chunkGroup.childrenIterable) {
+            queue.add(child);
+          }
+        }
+
+        for (const chunkGroup of queue) {
+          for (const chunk of chunkGroup.chunks) {
+            if (!initialChunks.has(chunk)) {
+              chunks.add(chunk);
+            }
+          }
+          for (const child of chunkGroup.childrenIterable) {
+            queue.add(child);
+          }
+        }
+
+        return chunks;
+      }
+
+      /**
+      * @typedef {Object} ChunkMaps
+      * @property {Record<string|number, string>} hash
+      * @property {Record<string|number, Record<string, string>>} contentHash
+      * @property {Record<string|number, string>} name
+      */
+
+      /**
+      * @param {boolean} realHash should the full hash or the rendered hash be used
+      * @returns {ChunkMaps} the chunk map information
+      */
+      getChunkMaps(realHash) {
+        /** @type {Record<string|number, string>} */
+        const chunkHashMap = Object.create(null);
+        /** @type {Record<string|number, Record<string, string>>} */
+        const chunkContentHashMap = Object.create(null);
+        /** @type {Record<string|number, string>} */
+        const chunkNameMap = Object.create(null);
+
+        for (const chunk of this.getAllAsyncChunks()) {
+          chunkHashMap[chunk.id] = realHash ? chunk.hash : chunk.renderedHash;
+          for (const key of Object.keys(chunk.contentHash)) {
+            if (!chunkContentHashMap[key]) {
+              chunkContentHashMap[key] = Object.create(null);
+            }
+            chunkContentHashMap[key][chunk.id] = chunk.contentHash[key];
+          }
+          if (chunk.name) {
+            chunkNameMap[chunk.id] = chunk.name;
+          }
+        }
+
+        return {
+          hash: chunkHashMap,
+          contentHash: chunkContentHashMap,
+          name: chunkNameMap
+        };
+      }
+
+      /**
+      * @returns {Record<string, Set<TODO>[]>} a record object of names to lists of child ids(?)
+      */
+      getChildIdsByOrders() {
+        const lists = new Map();
+        for (const group of this.groupsIterable) {
+          if (group.chunks[group.chunks.length - 1] === this) {
+            for (const childGroup of group.childrenIterable) {
+              // TODO webpack 5 remove this check for options
+              if (typeof childGroup.options === "object") {
+                for (const key of Object.keys(childGroup.options)) {
+                  if (key.endsWith("Order")) {
+                    const name = key.substr(0, key.length - "Order".length);
+                    let list = lists.get(name);
+                    if (list === undefined) lists.set(name, (list = []));
+                    list.push({
+                      order: childGroup.options[key],
+                      group: childGroup
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
+        const result = Object.create(null);
+        for (const [name, list] of lists) {
+          list.sort((a, b) => {
+            const cmp = b.order - a.order;
+            if (cmp !== 0) return cmp;
+            // TODO webpack 5 remove this check of compareTo
+            if (a.group.compareTo) {
+              return a.group.compareTo(b.group);
+            }
+            return 0;
+          });
+          result[name] = Array.from(
+            list.reduce((set, item) => {
+              for (const chunk of item.group.chunks) {
+                set.add(chunk.id);
+              }
+              return set;
+            }, new Set())
+          );
+        }
+        return result;
+      }
+
+      getChildIdsByOrdersMap(includeDirectChildren) {
+        const chunkMaps = Object.create(null);
+
+        const addChildIdsByOrdersToMap = chunk => {
+          const data = chunk.getChildIdsByOrders();
+          for (const key of Object.keys(data)) {
+            let chunkMap = chunkMaps[key];
+            if (chunkMap === undefined) {
+              chunkMaps[key] = chunkMap = Object.create(null);
+            }
+            chunkMap[chunk.id] = data[key];
+          }
+        };
+
+        if (includeDirectChildren) {
+          const chunks = new Set();
+          for (const chunkGroup of this.groupsIterable) {
+            for (const chunk of chunkGroup.chunks) {
+              chunks.add(chunk);
+            }
+          }
+          for (const chunk of chunks) {
+            addChildIdsByOrdersToMap(chunk);
+          }
+        }
+
+        for (const chunk of this.getAllAsyncChunks()) {
+          addChildIdsByOrdersToMap(chunk);
+        }
+
+        return chunkMaps;
+      }
+
+      /**
+      * @typedef {Object} ChunkModuleMaps
+      * @property {Record<string|number, (string|number)[]>} id
+      * @property {Record<string|number, string>} hash
+      */
+
+      /**
+      * @param {ModuleFilterPredicate} filterFn function used to filter modules
+      * @returns {ChunkModuleMaps} module map information
+      */
+      getChunkModuleMaps(filterFn) {
+        /** @type {Record<string|number, (string|number)[]>} */
+        const chunkModuleIdMap = Object.create(null);
+        /** @type {Record<string|number, string>} */
+        const chunkModuleHashMap = Object.create(null);
+
+        for (const chunk of this.getAllAsyncChunks()) {
+          /** @type {(string|number)[]} */
+          let array;
+          for (const module of chunk.modulesIterable) {
+            if (filterFn(module)) {
+              if (array === undefined) {
+                array = [];
+                chunkModuleIdMap[chunk.id] = array;
+              }
+              array.push(module.id);
+              chunkModuleHashMap[module.id] = module.renderedHash;
+            }
+          }
+          if (array !== undefined) {
+            array.sort();
+          }
+        }
+
+        return {
+          id: chunkModuleIdMap,
+          hash: chunkModuleHashMap
+        };
+      }
+
+      /**
+      *
+      * @param {function(Module): boolean} filterFn predicate function used to filter modules
+      * @param {function(Chunk): boolean} filterChunkFn predicate function used to filter chunks
+      * @returns {boolean} return true if module exists in graph
+      */
+      hasModuleInGraph(filterFn, filterChunkFn) {
+        const queue = new Set(this.groupsIterable);
+        const chunksProcessed = new Set();
+
+        for (const chunkGroup of queue) {
+          for (const chunk of chunkGroup.chunks) {
+            if (!chunksProcessed.has(chunk)) {
+              chunksProcessed.add(chunk);
+              if (!filterChunkFn || filterChunkFn(chunk)) {
+                for (const module of chunk.modulesIterable) {
+                  if (filterFn(module)) {
+                    return true;
+                  }
+                }
+              }
+            }
+          }
+          for (const child of chunkGroup.childrenIterable) {
+            queue.add(child);
+          }
+        }
+        return false;
+      }
+
+      toString() {
+        return `Chunk[${Array.from(this._modules).join()}]`;
+      }
+    }
     ```
     :::
