@@ -368,7 +368,6 @@ if (options.optimization.checkWasmTypes) {
 }
 let moduleIds = options.optimization.moduleIds;
 if (moduleIds === undefined) {
-  // TODO webpack 5 remove all these options
   if (options.optimization.occurrenceOrder) {
     moduleIds = "size";
   }
@@ -478,6 +477,82 @@ new RecordIdsPlugin({
 new WarnCaseSensitiveModulesPlugin().apply(compiler);
 ```
 
+1. **EnsureChunkConditionsPlugin**
+
+    详细的分析，请👇[EnsureChunkConditionsPlugin](../internal-plugins/EnsureChunkConditionsPlugin.md)。
+
+2. **RemoveParentModulesPlugin**
+
+    详细的分析，请👇[removeAvailableModules 选项配置](../configuration/optimization/removeAvailableModules.md)。
+
+3. **RemoveEmptyChunksPlugin**
+
+    详细的分析，请👇[removeEmptyChunks 选项配置](../configuration/optimization/removeEmptyChunks.md)。
+
+4. **MergeDuplicateChunksPlugin**
+
+    详细的分析，请👇[mergeDuplicateChunks 选项配置](../configuration/optimization/mergeDuplicateChunks.md)。
+
+5. **FlagIncludedChunksPlugin**
+
+    详细的分析，请👇[flagIncludedChunks 选项配置](../configuration/optimization/flagIncludedChunks.md)。
+
+6. **sideEffects**
+
+    详细的分析，请👇[sideEffects 选项配置](../configuration/optimization/sideEffects.md)。
+
+7. **FlagDependencyExportsPlugin&FlagDependencyUsagePlugin&**
+
+    详细的分析，请👇[providedExports 与 usedExports 选项配置](../configuration/optimization/providedExports&usedExports.md)。
+
+8. **ModuleConcatenationPlugin**
+
+    详细的分析，请👇[concatenateModules 选项配置](../configuration/optimization/concatenateModules.md)。
+
+9. **SplitChunksPlugin**
+
+    详细的分析，请👇[splitChunks 选项配置](../configuration/optimization/splitChunks.md)。
+
+10. **RuntimeChunkPlugin**
+
+    详细的分析，请👇[runtimeChunk 选项配置](../configuration/optimization/runtimeChunk.md)。
+
+11. **NoEmitOnErrorsPlugin**
+
+    详细的分析，请👇[noEmitOnErrors 选项配置](../configuration/optimization/splitChunks.md)。
+
+12. **WasmFinalizeExportsPlugin**
+
+    对 wasm 不了解，直接略过。
+
+13. **有关于 moduleIds**
+
+    详细的分析，请👇[moduleIds 选项配置](../configuration/optimization/namedModules&moduleIds&occurrenceOrder&hashedModuleIds.md)。
+
+14. **有关于 chunkIds**
+
+    详细的分析，请👇[chunkIds 选项配置](../configuration/optimization/namedChunks&chunkIds&occurrenceOrder.md)。
+
+15. **nodeEnv**
+
+    详细的分析，请👇[nodeEnv 选项配置](../configuration/optimization/nodeEnv.md)。
+
+16. **minimize**
+
+    详细的分析，请👇[minimize 选项配置](../configuration/optimization/minimize.md)。
+
+17. **TemplatedPathPlugin**
+
+    详细的分析，请👇[minimize 选项配置](../internal-plugins/TemplatedPathPlugin.md)。
+
+18. **RecordIdsPlugin**
+
+    详细的分析，请👇[portableRecords 选项配置](../configuration/optimization/portableRecords.md)。
+
+19. **WarnCaseSensitiveModulesPlugin**
+
+    详细的分析，请👇[WarnCaseSensitiveModulesPlugin](../internal-plugins/WarnCaseSensitiveModulesPlugin.md)。
+
 ### 第十步：options.performance
 
 ```js
@@ -534,4 +609,4 @@ compiler.hooks.afterResolvers.call(compiler);
 
 综上可以看出 webpack 内置的插件非常非常多，不过对于我们这个例子，很多 options 没有命中，所以不会那么复杂，上面也有针对配置项级别的分析，可以让你更好的去理解 webpack。
 
-在执行完 `webpackOptionsApply.process` 之后，所有的插件都已经利用 hooks 钩入了 webpack 构建流程当中，是时候启动 compiler 进行构建来激活所有插件的逻辑。
+在执行完 `webpackOptionsApply.process` 之后，所有的插件都已经利用 hooks 钩入了 webpack 构建流程当中，是时候启动 compiler 进行构建来激活所有插件。

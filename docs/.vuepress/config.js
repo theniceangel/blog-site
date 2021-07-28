@@ -42,32 +42,17 @@ module.exports = {
           ]
         },
         {
-          text: 'mode',
+          text: 'webpack 内部插件合集',
           children: [
-            '/webpack4/configuration/mode.md',
-          ],
+            '/webpack4/internal-plugins/TemplatedPathPlugin.md',
+            '/webpack4/internal-plugins/WarnCaseSensitiveModulesPlugin.md',
+          ]
         },
         {
-          text: 'optimization',
+          text: 'webpack 配置项',
           children: [
-            '/webpack4/configuration/optimization/splitChunks.md',
-            '/webpack4/configuration/optimization/runtimeChunk.md',
-            '/webpack4/configuration/optimization/removeAvailableModules.md',
-            '/webpack4/configuration/optimization/removeEmptyChunks.md',
-            '/webpack4/configuration/optimization/mergeDuplicateChunks.md',
-            '/webpack4/configuration/optimization/flagIncludedChunks.md',
-            '/webpack4/configuration/optimization/noEmitOnErrors.md',
-            '/webpack4/configuration/optimization/nodeEnv.md',
-            '/webpack4/configuration/optimization/namedModules&moduleIds&occurrenceOrder&hashedModuleIds.md',
-            '/webpack4/configuration/optimization/namedChunks&chunkIds&occurrenceOrder.md',
-            
-          ],
-        },
-        {
-          text: 'infrastructureLogging',
-          children: [
-            '/webpack4/configuration/infrastructureLogging.md'
-          ],
+            '/webpack4/configuration/README.md'
+          ]
         }
       ]
     },
