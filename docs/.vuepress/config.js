@@ -42,10 +42,24 @@ module.exports = {
           ]
         },
         {
+          text: '路径解析',
+          children: [
+            '/webpack4/module-resolver/README.md',
+            '/webpack4/module-resolver/Resolver.md',
+            '/webpack4/module-resolver/ResolverFactory.md',
+          ]
+        },
+        {
           text: 'webpack 内部插件合集',
           children: [
             '/webpack4/internal-plugins/TemplatedPathPlugin.md',
             '/webpack4/internal-plugins/WarnCaseSensitiveModulesPlugin.md',
+          ]
+        },
+        {
+          text: 'webpack 第三方库',
+          children: [
+            '/webpack4/third-dependencies/README.md'
           ]
         },
         {

@@ -748,7 +748,7 @@ class DependenciesBlock {
   constructor() {
     this.dependencies = []; // 当前模块的依赖
     this.blocks = []; // 当前模块的代码分割点
-    this.variables = []; // 当前模块是否用了 __filename, __dirname, __resourceQuery, __webpack_amd_options__ 等内置变量
+    this.variables = []; // 当前模块是否用了 __filename, __dirname, __resourceQuery, __webpack_amd_options__ 等内置变量，也有可能通过 webpack 的 node 配置项来注入一些 polyfill，比如 process 的 polyfill
   }
 }
 ```
