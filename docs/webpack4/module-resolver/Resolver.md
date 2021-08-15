@@ -172,6 +172,28 @@ class Resolver {
 
 对一个请求路径进行 parse。
 
+- **join**
+
+```js
+class Resolver {
+  join(path, request) {
+		let cacheEntry;
+		let pathCache = memoizedJoin.get(path);
+		if (typeof pathCache === "undefined") {
+			memoizedJoin.set(path, (pathCache = new Map()));
+		} else {
+			cacheEntry = pathCache.get(request);
+			if (typeof cacheEntry !== "undefined") return cacheEntry;
+		}
+		cacheEntry = memoryFsJoin(path, request);
+		pathCache.set(request, cacheEntry);
+		return cacheEntry;
+	}
+}
+```
+
+join 方法为了拼接 path 和 request，比如模块请求是 `./a.js`，而搜寻的 path 是 `/Users/webpack-demo/`，得到的全路径就是 `/Users/webpack-demo/a.js`。方法内部为了性能会做缓存。
+
 - **resolveSync, resolve, doResolve**
 
 ```js

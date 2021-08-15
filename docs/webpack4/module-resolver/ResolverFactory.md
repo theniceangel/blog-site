@@ -346,7 +346,7 @@ exports.createResolver = function(options) {
 
 - **第三步：准备好所有的 plugins，并逐一调用 apply**
 
-最后就是返回 `resolver` 实例，想要启动真正的解析路径的过程，需要调用 `resolver.resolve` 方法的时机，是在 webpack 当中解析 normal module 的路径和 loader 路径。
+最后就是返回 `resolver` 实例，想要启动真正的解析路径的过程，需要调用 `resolver.resolve` 方法的时机，是当 webpack 解析 normal module 的路径和 loader 模块路径。
 
 ```js
 // NormalModuleFactory.js
@@ -392,7 +392,7 @@ asyncLib.parallel(
 
 ## Plugins
 
-Resolver 的 plugin 与 webpack 的 plugin 类似，都具有一定的范式，首先他得实现 apply 接口，接受的参数是 resolver 实例，并且钩入 `source hook`，而且通过 `resolver.doResolve` 方法将流程转交给 `target hook`，`resolver.doResolve` 内部会调用 `target hook` 来执行插件中 `tapAsync` 方法注入的钩子回调。
+Resolver 的 plugin 与 webpack 的 plugin 类似，都具有一定的范式，首先他得实现 apply 接口，接受的参数是 resolver 实例，并且钩入 `source hook`，而且通过 `resolver.doResolve` 方法将流程转交给 `target hook`，`resolver.doResolve` 内部会调用 `target hook` 的 callAsync 来逐步执行插件中 `tapAsync` 方法注入的函数。
 
 ```js
 module.exports = class MyPlugin {
@@ -812,7 +812,7 @@ module.exports = class ConcordModulesPlugin {
 ```
 :::
 
-ConcordModulesPlugin 内部存在调用以下的代码，代表跳过 describedResolve 后续所有的 tapAsync 函数，就会跳过 AliasFieldPlugin，ModuleKindPlugin，JoinRequestPlugin，RootPlugin 等插件的逻辑。
+ConcordModulesPlugin 内部存在调用以下的代码，代表跳过 describedResolve 后续所有的 tapAsync 函数，相当于跳过 AliasFieldPlugin，ModuleKindPlugin，JoinRequestPlugin，RootPlugin 等插件的逻辑。
 
 ```js
 // 跳过 describedResolve 后续所有的 tapAsync 函数
@@ -985,5 +985,97 @@ callback(null, result);
 
 :::details JoinRequestPlugin.js
 ```js
+module.exports = class JoinRequestPlugin {
+  constructor(source, target) {
+    this.source = source;
+    this.target = target;
+  }
+
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source) // describedResolve
+      .tapAsync("JoinRequestPlugin", (request, resolveContext, callback) => {
+        const obj = Object.assign({}, request, {
+          path: resolver.join(request.path, request.request),
+          relativePath:
+            request.relativePath &&
+            resolver.join(request.relativePath, request.request),
+          request: undefined
+        });
+        // relative
+        resolver.doResolve(target, obj, null, resolveContext, callback);
+      });
+  }
+};
 ```
 :::
+
+JoinRequestPlugin 主要是为了拼接 path 和 request，用到的是 [resolver](./Resolver.md) 的 join 方法，并且这个阶段会把 `request` 置空，接着将流程推向 relative hook，如果 relative 的流程走完了，会执行上述的 `callback`，如果 callback 的入参为空，会走到 describedResolve 的下一个 tapAsync 函数内部，也就是 RootPlugin 内部。
+
+## RootPlugin
+
+:::details RootPlugin.js
+```js
+class RootPlugin {
+  /**
+   * @param {string | ResolveStepHook} source source hook
+   * @param {Array<string>} root roots
+   * @param {string | ResolveStepHook} target target hook
+   * @param {boolean=} ignoreErrors ignore error during resolving of root paths
+   */
+  constructor(source, root, target, ignoreErrors) {
+    this.root = root;
+    this.source = source;
+    this.target = target;
+    this._ignoreErrors = ignoreErrors;
+  }
+
+  /**
+   * @param {Resolver} resolver the resolver
+   * @returns {void}
+   */
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+
+    resolver
+      .getHook(this.source) // describedResolve
+      .tapAsync("RootPlugin", (request, resolveContext, callback) => {
+        const req = request.request;
+        if (!req) return callback();
+        // 当前的 request 必须是以 '/' 开头，代表绝对路径
+        if (!req.startsWith("/")) return callback();
+        // 以 root 拼接 path
+        const path = resolver.join(this.root, req.slice(1));
+        const obj = Object.assign(request, {
+          path,
+          relativePath: request.relativePath && path
+        });
+        // relative
+        resolver.doResolve(
+          target,
+          obj,
+          `root path ${this.root}`,
+          resolveContext,
+          this._ignoreErrors
+            ? (err, result) => {
+                if (err) {
+                  if (resolveContext.log) {
+                    resolveContext.log(
+                      `Ignored fatal error while resolving root path:\n${err}`
+                    );
+                  }
+                  return callback();
+                }
+                if (result) return callback(null, result);
+                callback();
+              }
+            : callback
+        );
+      });
+  }
+}
+```
+:::
+
+RootPlugin 尝试在配置的 root 路径里面找到对应的 request，不过 request 必须是绝对路径的请求，接着将流程推向 relative hook，如果 relative 的流程走完了，会执行上述的 `callback`，如果 callback 的入参为空，会走到调用 describedResolve hook 的 callAsync 的第二个回调函数，这个时候就回退到 parsedResolve hook 的 callAsync 的第二个回调函数，不断地解开**套娃**，直到调用 `resolver.resolve` 的回调函数，代表所有的数据都解析完成。
