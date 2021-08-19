@@ -323,7 +323,7 @@ exports.createResolver = function(options) {
 
 - **第一步：解析 options**
 
-    options 来源于 webpack config 的 resolve 配置 或者 resolverLoader 配置，主要是看生成的 resolver 到底是为了解析哪种类型的路径。
+    options 来源于 webpack config 的 resolve 配置或者 resolverLoader 配置，主要是看生成的 resolver 到底是为了解析哪种类型路径。
 
     ```js
     module.exports = {
@@ -346,7 +346,7 @@ exports.createResolver = function(options) {
 
 - **第三步：准备好所有的 plugins，并逐一调用 apply**
 
-最后就是返回 `resolver` 实例，想要启动真正的解析路径的过程，需要调用 `resolver.resolve` 方法的时机，是当 webpack 解析 normal module 的路径和 loader 模块路径。
+最后就是返回 `resolver` 实例，这些都是前期准备工作，如果想要启动真正的解析路径，需要调用 `resolver.resolve` 方法，这个时机是当 webpack 解析 normal module 的路径和 loader 模块路径的时候。
 
 ```js
 // NormalModuleFactory.js
@@ -392,7 +392,7 @@ asyncLib.parallel(
 
 ## Plugins
 
-Resolver 的 plugin 与 webpack 的 plugin 类似，都具有一定的范式，首先他得实现 apply 接口，接受的参数是 resolver 实例，并且钩入 `source hook`，而且通过 `resolver.doResolve` 方法将流程转交给 `target hook`，`resolver.doResolve` 内部会调用 `target hook` 的 callAsync 来逐步执行插件中 `tapAsync` 方法注入的函数。
+Resolver 的 plugin 与 webpack 的 plugin 类似，都具有一定的范式，首先他得实现 apply 接口，接受的参数是 resolver 实例，并且钩入 `source hook`，而且通过 `resolver.doResolve` 方法将流程转交给 `target hook`，`resolver.doResolve` 内部会调用 `target hook` 的 `callAsync` 来逐步执行插件中 `tapAsync` 方法注入的函数。
 
 ```js
 module.exports = class MyPlugin {
@@ -422,7 +422,7 @@ module.exports = class MyPlugin {
 };
 ```
 
-`target` 以及 `source` hook 在 createResolver 已经枚举好了，它形成了一个 pipeline，从 `'resolve'` 钩子开始到 `'resolved'` 钩子结束，当然这个过程并不是一成不变的，对于 `describedResolve` hook，可能又会流转回 `'resolve'` 钩子，相当于开启一轮新的 resolve 过程，这种情况在引入一个 npm 包的时候会遇到，比如 `import vue from 'Vue'`。
+`target` 以及 `source` hook 在 createResolver 已经枚举好了，它形成了一个 pipeline，从 `resolve` 钩子开始到 `resolved` 钩子结束，当然这个过程并不是从一而终的，pipeline 之间存在**反复跳跃**的过程，对于 `describedResolve` hook，可能又会流转回 `resolve` hook，相当于开启一轮新的 resolve 过程，这种情况在引入一个 npm 包的时候会遇到，比如 `import vue from 'Vue'`。再比如配置了 webpack 的 `resolve.alias`，也会在解析的过程中流转回 `resolve` hook。
 
 ```js
 // 出发点
@@ -443,9 +443,90 @@ resolver.ensureHook("existingFile");
 resolver.ensureHook("resolved");
 ```
 
-下面来看看内置的 Plugins 到底做了哪些工作？
+首先要弄清楚一个概念：通过 `resolver.ensureHook` 得到的 hook 都属于 `AsyncSeriesBailHook` 类型。这种 hook 具有以下的特点：
 
-## UnsafeCachePlugin
+- **1.异步执行**
+
+- **2.只要前一个 tapAsync 函数调用 callback 的第二个参数是 undefined，就会接着执行下一个 tapAsync 函数，否则跳过后续所有的 tapAsync 函数**
+
+比如：
+
+```js
+let resolveHook = new AsyncSeriesBailHook()
+resolveHook.tapAsync('async1', (callback) => {
+  setTimeout(() => {
+    callback()
+  }, 1000);
+})
+
+resolveHook.tapAsync('async2', (callback) => {
+  console.log('async2')
+  setTimeout(() => {
+    callback()
+  }, 2000);
+})
+
+resolveHook.callAsync((err) => {
+  console.log('callAsyncCallback 触发了')
+})
+```
+
+:::tip
+姑且将 tapAsync 函数的第二个参数称为 tapAsyncCallback，tapAsyncCallback 接收 callback 作为它的参数，调用 callback 时候传递的参数，决定了是走进下一个 tapAsyncCallback，还是直接走进 callAsync 函数的第一个 callAsyncCallback 函数。
+:::
+
+由于调用 `async1 tapAsyncCallback` 的 callback 没有传入参数，过了1秒，会接着走进 `async2 tapAsyncCallback`，再过了 2s 走到 `callAsyncCallback` 的内部，打印 `'callAsyncCallback 触发了'`。如果改成下面这种：
+
+```js
+let resolveHook = new AsyncSeriesBailHook()
+resolveHook.tapAsync('async1', (callback) => {
+  setTimeout(() => {
+    callback(null, '1')
+  }, 1000);
+})
+
+resolveHook.tapAsync('async2', (callback) => {
+  console.log('async2')
+  setTimeout(() => {
+    callback()
+  }, 2000);
+})
+
+resolveHook.callAsync((err, res) => {
+  console.log(res) // 过了 1s 后，打印 '1'，会跳过 async2
+  console.log('callAsyncCallback 触发了')
+})
+```
+
+由于调用 `async1 tapAsyncCallback` 的 callback 第二个参数不是 undefined，所以会跳过 `async2 tapAsyncCallback`，这也就是 `'AsyncSeriesBailHook'` 中的 `'Bail'` 的精髓所在，它的意思表示**保险的**，只要有一个返回值，就会跳过后续所有的 tapAsyncCallback。
+
+下面具体根据 pipeline 上的各种 hooks 来了解 Resolver。
+
+## resolver.hooks.resolve
+
+钩入 resolve hook 的插件有两个，分别是 UnsafeCachePlugin 和 ParsePlugin 插件，当然 UnsafeCachePlugin 插件的使用取决于 `options.unsafeCache`。如果使用了它，会 ensure 出一个新的 hook，叫做 `newResolve`，否则就直接使用 ParsePlugin 钩入 resolve hook。
+
+```js
+// resolve
+if (unsafeCache) {
+  plugins.push(
+    new UnsafeCachePlugin(
+      "resolve",
+      cachePredicate,
+      unsafeCache,
+      cacheWithContext,
+      "new-resolve"
+    )
+  );
+  plugins.push(new ParsePlugin("new-resolve", "parsed-resolve"));
+} else {
+  plugins.push(new ParsePlugin("resolve", "parsed-resolve"));
+}
+```
+
+看看 UnsafeCachePlugin 插件的逻辑。
+
+### UnsafeCachePlugin
 
 ::: details UnsafeCachePlugin.js
 ```js
@@ -472,11 +553,12 @@ module.exports = class UnsafeCachePlugin {
     resolver
       .getHook(this.source) // 'resolve'
       .tapAsync("UnsafeCachePlugin", (request, resolveContext, callback) => {
-        // 是否命中白名单，默认缓存所有请求
+        // 是否命中白名单（默认缓存所有请求）
         if (!this.filterPredicate(request)) return callback();
         // 获取缓存 id
         const cacheId = getCacheId(request, this.withContext);
         const cacheEntry = this.cache[cacheId];
+        // 如果命中，跳过后续所有的流程
         if (cacheEntry) {
           return callback(null, cacheEntry);
         }
@@ -498,11 +580,17 @@ module.exports = class UnsafeCachePlugin {
 ```
 :::
 
-UnsafeCachePlugin 位于 resolve 流程的起点，这个插件是通过 `unsafeCache` 配置项来注入的，默认是**不使用该插件**，插件的作用是缓存以前解析过的请求，如果没有命中缓存，通过 `resolver.doResolve` 将流程推向 `'newResolve'` 钩子，触发这个钩子会走进 ParsePlugin 插件内部。**同时要注意 'UnsafeCachePlugin' 的 tap 回调函数的第三个参数 callback 被包裹进 resolver.doResolve 的最后一个匿名函数参数里面了，开始了漫长的套娃过程**。
+UnsafeCachePlugin 的作用是缓存以前解析过的请求，如果没有命中缓存，通过 `resolver.doResolve` 将流程推向 `'newResolve'` 钩子，触发这个钩子会走进 ParsePlugin 插件内部。**同时要注意 'UnsafeCachePlugin' 的 tapAsyncCallback 的 callback 被包裹进 resolver.doResolve 的最后一个匿名函数参数里面了，开始了漫长的套娃过程**，走完 `resolved` hook 的时候拿到最后的 result 之后会缓存在 `this.cache`。
 
 > doResolve 的过程可以👇[这里](./Resolver.md)
 
-## ParsePlugin
+由于没有命中缓存，将 `newResolve` hook 丢给 `resolver.doResolve`，调用 `newResolve` hook 的 callAsync。
+
+## resolver.hooks.newResolve
+
+钩入 newResolve hook 的插件只有 ParsePlugin。
+
+### ParsePlugin
 
 :::details ParsePlugin.js
 ```js
@@ -536,15 +624,20 @@ module.exports = class ParsePlugin {
 ```
 :::
 
-ParsePlugin 的作用是对模块的请求路径进行解析，并且把解析后的信息挂载到 obj 上，将流程推向 `'parsedResolve'` 钩子，也就会走到 DescriptionFilePlugin 和 NextPlugin 插件内部。
+ParsePlugin 既可以钩入 `resolve` hook，也可以钩入 `newResolve` hook，它的作用是对模块的请求路径进行解析，并且把解析后的信息挂载到 obj 上，将流程推向 `parsedResolve` hook。
 
-## DescriptionFilePlugin
+## resolver.hooks.parsedResolve
+
+钩入 `parsedResolve` hook 的插件包括 DescriptionFilePlugin 与 NextPlugin。
+
+### DescriptionFilePlugin
 
 :::details DescriptionFilePlugin.js
 ```js
 module.exports = class DescriptionFilePlugin {
   constructor(source, filenames, target) {
     this.source = source;
+    // 指定描述性文件的名称，默认是 ['package.json']
     this.filenames = [].concat(filenames);
     this.target = target;
   }
@@ -563,7 +656,7 @@ module.exports = class DescriptionFilePlugin {
             this.filenames,
             resolveContext,
             (err, result) => {
-              // 如果发生错误，走进 'parsedResolve' 钩子的下一个 tapAsync 钩子函数去
+              // 如果发生错误，直接执行 parsedResolve 的 callAsyncCallback
               if (err) return callback(err);
               if (!result) {
                 if (resolveContext.missing) {
@@ -575,7 +668,8 @@ module.exports = class DescriptionFilePlugin {
                 }
                 if (resolveContext.log)
                   resolveContext.log("No description file found");
-                // 遍历完用户的整个文件系统都没有找到 package.json， 走进 parsedResolve 钩子的下一个 tapAsync 钩子函数去
+                // 从 directory 开始向上遍历用户的文件系统都没有找到 package.json， 
+                // 走进 parsedResolve 钩子的下一个 tapAsyncCallback，也就是 NextPlugin 插件内部
                 return callback();
               }
               // 如果解析到了 package.json，将流程推向 describedResolve 钩子
@@ -601,9 +695,9 @@ module.exports = class DescriptionFilePlugin {
                 resolveContext,
                 (err, result) => {
                   if (err) return callback(err);
-                  // 不用走到 parsedResolve 钩子的下一个 tapAsync 钩子函数里面去了。
+                  // 不用走到 parsedResolve 钩子的下一个 tapAsyncCallback，也就是 NextPlugin 插件内部
                   if (result === undefined) return callback(null, null);
-                  // 同样也是跳过 parsedResolve 的下一个 tapAsync 钩子函数
+                  // 同样也是跳过 parsedResolve 的下一个 tapAsyncCallback
                   callback(null, result);
                 }
               );
@@ -618,7 +712,7 @@ module.exports = class DescriptionFilePlugin {
 
 DescriptionFilePlugin 的作用是找到距离 `request.path` 最近的 package.json 文件。
 
-DescriptionFilePlugin 与 NextPlugin 都是钩入 parsedResolve 钩子，而且它属于 `AsyncSeriesBailHook` 类型，所以对于 DescriptionFilePlugin 下面这段代码，就会跳过 NextPlugin 的 tapAsync 回调函数。
+DescriptionFilePlugin 与 NextPlugin 都是钩入 parsedResolve 钩子，下面这段代码，就会跳过 NextPlugin 的 tapAsyncCallback。
 
 ```js
 // 第二个参数 null，会导致 parsedResolve hook 跳过 NextPlugin 的处理
@@ -626,7 +720,7 @@ if (result === undefined) return callback(null, null);
 callback(null, result);
 ```
 
-## NextPlugin
+### NextPlugin
 
 :::details
 ```js
@@ -649,13 +743,17 @@ module.exports = class NextPlugin {
 ```
 :::
 
-NextPlugin 的作用很简单，在这里就是用来将流程推向 `'describedResolve'` 钩子，因为 DescriptionFilePlugin 没有找到 package.json，所以需要将流程继续进行下去，当然也可以在 DescriptionFilePlugin 直接调用 `resolver.doResolve` 来将流程主动推向 `'describedResolve'` 钩子，为什么没这么做呢，我猜测的原因应该是**单一职责性**，DescriptionFilePlugin 就是为了来找到 package.json 的，而且抽象出 NextPlugin 就是用来进行流程的衔接。
+NextPlugin 很万精油，它的作用就是用来将流程推向任意的 `target` hook，这个取决于实例化 NextPlugin 的时候传入的 source 以及 target。而对于现阶段，它就是用来将流程推向 `describedResolve` hook，因为 DescriptionFilePlugin 没有找到 package.json，但是解析路径的任务还没有完成，所以需要用到 NextPlugin。
 
-触发 `'describedResolve'` 钩子的 callAsync，根据不同的配置可能走进 AliasPlugin、ConcordModulesPlugin、AliasFieldPlugin、ModuleKindPlugin、JoinRequestPlugin、RootPlugin 插件内部。
+无论是 DescriptionFilePlugin 还是 NextPlugin，都会将流程推向 `describedResolve` hook
 
-## AliasPlugin
+### resolver.hooks.describedResolve
 
-AliasPlugin 的启用必须在 webpack.config.js 配置了 `resolve.alias`。
+钩入 describedResolve hook 的插件有很多，有些插件的开启也是因为 options 的配置决定的，包括有 AliasPlugin、ConcordModulesPlugin、AliasFieldPlugin、ModuleKindPlugin、JoinRequestPlugin、RootPlugin。
+
+### AliasPlugin
+
+AliasPlugin 的启用由 `options.alias` 控制，对于 webpack 来说，需要在 webpack.config.js 配置 `resolve.alias`。
 
 :::details AliasPlugin.js
 ```js
@@ -690,7 +788,7 @@ module.exports = class AliasPlugin {
               });
               // 根据 newRequestStr 从 resolve 钩子发起新一轮的路径解析
               return resolver.doResolve(
-                target,
+                target, // resolve
                 obj,
                 "aliased with mapping '" +
                   item.name +
@@ -719,7 +817,7 @@ module.exports = class AliasPlugin {
 ```
 :::
 
-AliasPlugin 的作用是用任意其他的模块替换原始的请求模块，这是一个非常有用的功能，比如：
+AliasPlugin 的作用是用其他的模块替换原始的请求模块，这是一个非常有用的功能，比如：
 
 ```js
 // index.js
@@ -738,9 +836,9 @@ module.exports = {
 };
 ```
 
-从上面的代码可以看出，如果请求与 `resolve.alias` 命中了，就回到解析路径的起点——resolve 钩子进行新一轮的路径解析，因为请求路径已经被替换了，成功解析出路径之后就跳过 ConcordModulesPlugin、AliasFieldPlugin 等等插件的 tapAsync 函数，因为他们都是使用 `describedResolve` 钩子，如果没有命中，就执行 `callback` 函数，就进入 describedResolve 钩子的第二个 tapAsync 函数，也就是 ConcordModulesPlugin 插件。
+从上面的代码可以看出，如果请求与 `resolve.alias` 命中了，就回到解析路径的起点——resolve 钩子进行新一轮的路径解析，因为请求路径已经被替换了，成功解析出路径之后就跳过 ConcordModulesPlugin、AliasFieldPlugin 等等插件，如果没有命中，就执行 `callback` 函数，就进入 describedResolve 钩子的第二个 tapAsyncCallback，也走进 ConcordModulesPlugin 插件。
 
-## ConcordModulesPlugin
+### ConcordModulesPlugin
 
 插件的开启，必须配置 webpack 的 `resolve.concord` 为 true，默认是不开启插件的。v4 官方文档没有提到它，你可以阅读 [什么是 concord 配置](https://github.com/webpack/concord) 这片文章来了解更多的详情。
 
@@ -772,10 +870,10 @@ module.exports = class ConcordModulesPlugin {
           concordField,
           innerRequest
         );
-        // 如果没有配置，那么接着执行 describedResolve 下一个 tapAsync 函数
+        // 如果没有配置，那么接着执行 describedResolve 下一个 tapAsyncCallback
         if (data === innerRequest) return callback();
         if (data === undefined) return callback();
-        // 中断 describedResolve 的 tapAsync 函数调用
+        // 跳过后续所有的 tapAsyncCallback，执行 describedResolve 的 callAsyncCallback
         if (data === false) {
           const ignoreObj = Object.assign({}, request, {
             path: false
@@ -812,20 +910,18 @@ module.exports = class ConcordModulesPlugin {
 ```
 :::
 
-ConcordModulesPlugin 内部存在调用以下的代码，代表跳过 describedResolve 后续所有的 tapAsync 函数，相当于跳过 AliasFieldPlugin，ModuleKindPlugin，JoinRequestPlugin，RootPlugin 等插件的逻辑。
+ConcordModulesPlugin 内部存在调用以下的代码，代表跳过 describedResolve 后续所有的 tapAsync 函数，相当于跳过 AliasFieldPlugin，ModuleKindPlugin，JoinRequestPlugin，RootPlugin 等插件的逻辑，直接调用 describedResolve 的 callAsyncCallback 函数。
 
 ```js
-// 跳过 describedResolve 后续所有的 tapAsync 函数
+// 跳过 describedResolve 后续所有的 tapAsyncCallback
 return callback(null, ignoreObj);
-// 跳过 describedResolve 后续所有的 tapAsync 函数
 return callback(null, null);
-// 跳过 describedResolve 后续所有的 tapAsync 函数
 callback(null, result);
 ```
 
-否则的话，调用 `callback()` 会将走到 describedResolve 的下一个 tapAsync 函数内部，也就是 AliasFieldPlugin 内部。
+否则的话，调用 `callback()` 会将走到 describedResolve 的下一个 tapAsyncCallback，也就是 AliasFieldPlugin 内部。
 
-## AliasFieldPlugin
+### AliasFieldPlugin
 
 插件的开启，必须配置 webpack 的 `resolve.aliasFields` 字段。比如：
 
@@ -839,7 +935,7 @@ module.exports = {
 };
 ```
 
-这样 ResolverFactory 就会找到对应的 `request.descriptionFile`，也就是**距离请求模块最近的 `package.json`**，里面的 `browser` 字段可以配置为**字符串**或者**对象**，具体的解释可以看[这篇文章](https://github.com/defunctzombie/package-browser-field-spec)，配置为对象的时候，才会交给 AliasFieldPlugin 处理，配置为字符串的时候，会丢给 MainFieldPlugin 处理，这个时候得搭配 webpack 的 `resolve.mainFields` 字段才行，下文会提及。
+ResolverFactory 会找到对应的 `request.descriptionFile`，也就是**距离请求模块最近的 `package.json`**。这个描述性文件的 `browser` 字段可以配置为**字符串**或者**对象**，具体的解释可以看[这篇文章](https://github.com/defunctzombie/package-browser-field-spec)，配置为对象的时候，才会交给 AliasFieldPlugin 处理，配置为字符串的时候，会丢给 MainFieldPlugin 处理，这个时候得搭配 webpack 的 `resolve.mainFields` 字段才行，下文会提及。
 
 :::details AliasFieldPlugin.js
 ```js
@@ -855,7 +951,6 @@ module.exports = class AliasFieldPlugin {
     resolver
       .getHook(this.source) // describedResolve
       .tapAsync("AliasFieldPlugin", (request, resolveContext, callback) => {
-        debugger
         if (!request.descriptionFileData) return callback();
         const innerRequest = getInnerRequest(resolver, request);
         if (!innerRequest) return callback();
@@ -863,7 +958,7 @@ module.exports = class AliasFieldPlugin {
           request.descriptionFileData,
           this.field
         );
-        // 如果值不是一个对象，接着执行 describedResolve 下一个 tapAsync 函数
+        // 如果值不是一个对象，接着执行 describedResolve 下一个 tapAsyncCallback
         if (typeof fieldData !== "object") {
           if (resolveContext.log)
             resolveContext.log(
@@ -876,10 +971,10 @@ module.exports = class AliasFieldPlugin {
         const data1 = fieldData[innerRequest];
         const data2 = fieldData[innerRequest.replace(/^\.\//, "")];
         const data = typeof data1 !== "undefined" ? data1 : data2;
-        // 接着执行 describedResolve 下一个 tapAsync 函数
+        // 接着执行 describedResolve 下一个 tapAsyncCallback
         if (data === innerRequest) return callback();
         if (data === undefined) return callback();
-        // 如果配置的请求为 false，中断 describedResolve 的 tapAsync 函数调用
+        // 如果配置的请求为 false，中断 describedResolve 的 tapAsyncCallback，直接调用 callAsyncCallback
         if (data === false) {
           const ignoreObj = Object.assign({}, request, {
             path: false
@@ -919,17 +1014,15 @@ module.exports = class AliasFieldPlugin {
 AliasFieldPlugin 内部存在调用以下的代码，代表跳过 describedResolve 后续所有的 tapAsync 函数，就会跳过 ModuleKindPlugin，JoinRequestPlugin，RootPlugin 等插件的逻辑。
 
 ```js
-// 跳过 describedResolve 后续所有的 tapAsync 函数
+// 跳过 describedResolve 后续所有的 tapAsyncCallback
 return callback(null, ignoreObj);
-// 跳过 describedResolve 后续所有的 tapAsync 函数
 return callback(null, null);
-// 跳过 describedResolve 后续所有的 tapAsync 函数
 callback(null, result);
 ```
 
 否则的话，调用 `callback()` 会将走到 describedResolve 的下一个 tapAsync 函数内部，也就是 ModuleKindPlugin 内部。
 
-## ModuleKindPlugin
+### ModuleKindPlugin
 
 :::details ModuleKindPlugin.js
 ```js
@@ -959,7 +1052,7 @@ module.exports = class ModuleKindPlugin {
           (err, result) => {
             if (err) return callback(err);
 
-            // 跳过 describedResolve 后续所有的 tapAsync 函数
+            // 跳过 describedResolve 后续所有的 tapAsyncCallback
             if (result === undefined) return callback(null, null);
             callback(null, result);
           }
@@ -973,15 +1066,14 @@ module.exports = class ModuleKindPlugin {
 ModuleKindPlugin 内部存在调用以下的代码，代表跳过 describedResolve 后续所有的 tapAsync 函数，就会跳过 JoinRequestPlugin，RootPlugin 等插件的逻辑
 
 ```js
-// 跳过 describedResolve 后续所有的 tapAsync 函数
+// 跳过 describedResolve 后续所有的 tapAsyncCallback
 return callback(null, null);
-// 跳过 describedResolve 后续所有的 tapAsync 函数
 callback(null, result);
 ```
 
 如果不是一个 module 类型的请求，调用 `callback()` 会将走到 describedResolve 的下一个 tapAsync 函数内部，也就是 JoinRequestPlugin 内部。
 
-## JoinRequestPlugin
+### JoinRequestPlugin
 
 :::details JoinRequestPlugin.js
 ```js
@@ -1011,30 +1103,19 @@ module.exports = class JoinRequestPlugin {
 ```
 :::
 
-JoinRequestPlugin 主要是为了拼接 path 和 request，用到的是 [resolver](./Resolver.md) 的 join 方法，并且这个阶段会把 `request` 置空，接着将流程推向 relative hook，如果 relative 的流程走完了，会执行上述的 `callback`，如果 callback 的入参为空，会走到 describedResolve 的下一个 tapAsync 函数内部，也就是 RootPlugin 内部。
+JoinRequestPlugin 主要是为了拼接 path 和 request，用到的是 [resolver](./Resolver.md) 的 join 方法，并且这个阶段会把 `request` 置空，接着将流程推向 `relative` hook，如果 relative 的流程走完了，会执行上述的 `callback`，如果 callback 的入参为空，会走到 describedResolve 的下一个 tapAsync 函数内部，也就是 RootPlugin 内部。
 
-## RootPlugin
+### RootPlugin
 
 :::details RootPlugin.js
 ```js
 class RootPlugin {
-  /**
-   * @param {string | ResolveStepHook} source source hook
-   * @param {Array<string>} root roots
-   * @param {string | ResolveStepHook} target target hook
-   * @param {boolean=} ignoreErrors ignore error during resolving of root paths
-   */
   constructor(source, root, target, ignoreErrors) {
     this.root = root;
     this.source = source;
     this.target = target;
     this._ignoreErrors = ignoreErrors;
   }
-
-  /**
-   * @param {Resolver} resolver the resolver
-   * @returns {void}
-   */
   apply(resolver) {
     const target = resolver.ensureHook(this.target);
 
@@ -1078,4 +1159,4 @@ class RootPlugin {
 ```
 :::
 
-RootPlugin 尝试在配置的 root 路径里面找到对应的 request，不过 request 必须是绝对路径的请求，接着将流程推向 relative hook，如果 relative 的流程走完了，会执行上述的 `callback`，如果 callback 的入参为空，会走到调用 describedResolve hook 的 callAsync 的第二个回调函数，这个时候就回退到 parsedResolve hook 的 callAsync 的第二个回调函数，不断地解开**套娃**，直到调用 `resolver.resolve` 的回调函数，代表所有的数据都解析完成。
+RootPlugin 尝试在配置的 root 路径里面找到对应的 request，不过 request 必须是绝对路径的请求，接着将流程推向 `relative` hook，如果 relative 的流程走完了，会执行上述的 `callback`，如果 callback 的入参为空，会走到调用 `describedResolve` hook 的 callAsyncCallback，这个时候就回退到 parsedResolve hook 的 callAsyncCallback，不断地解开**套娃**，直到调用 `resolver.resolve` 的回调函数，代表所有的数据都解析完成。
