@@ -172,6 +172,18 @@ class Resolver {
 
 对一个请求路径进行 parse。
 
+- **isDirectory**
+
+```js
+const REGEXP_DIRECTORY = /[\\/]$/i;
+class Resolver {
+  // 请求的结尾不能含有 '/' 或者 '\'
+  isDirectory(path) {
+		return REGEXP_DIRECTORY.test(path);
+	}
+}
+```
+
 - **join**
 
 ```js
