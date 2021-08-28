@@ -1177,46 +1177,46 @@ import xxx from 'vue/dist/vue.js'
 :::details ModuleAppendPlugin.js
 ```js
 module.exports = class ModuleAppendPlugin {
-	constructor(source, appending, target) {
-		this.source = source;
-		this.appending = appending;
-		this.target = target;
-	}
+  constructor(source, appending, target) {
+    this.source = source;
+    this.appending = appending;
+    this.target = target;
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source) // rawModule
-			.tapAsync("ModuleAppendPlugin", (request, resolveContext, callback) => {
-				const i = request.request.indexOf("/"),
-					j = request.request.indexOf("\\");
-				const p = i < 0 ? j : j < 0 ? i : i < j ? i : j;
-				let moduleName, remainingRequest;
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source) // rawModule
+      .tapAsync("ModuleAppendPlugin", (request, resolveContext, callback) => {
+        const i = request.request.indexOf("/"),
+          j = request.request.indexOf("\\");
+        const p = i < 0 ? j : j < 0 ? i : i < j ? i : j;
+        let moduleName, remainingRequest;
         // 获取模块的名称
-				if (p < 0) {
-					moduleName = request.request;
-					remainingRequest = "";
-				} else {
-					moduleName = request.request.substr(0, p);
-					remainingRequest = request.request.substr(p);
-				}
+        if (p < 0) {
+          moduleName = request.request;
+          remainingRequest = "";
+        } else {
+          moduleName = request.request.substr(0, p);
+          remainingRequest = request.request.substr(p);
+        }
         // 目前没发现可能走到下面的场景，因为如果 moduleName 为 '.' 或者 '..'，
         // 早在 ModuleKindPlugin 就已经被拦截，不会走到这里
-				if (moduleName === "." || moduleName === "..") return callback();
+        if (moduleName === "." || moduleName === "..") return callback();
         // 拼接 moduleExtension
-				const moduleFinalName = moduleName + this.appending;
-				const obj = Object.assign({}, request, {
-					request: moduleFinalName + remainingRequest
-				});
-				resolver.doResolve(
-					target, // module
-					obj,
-					"module variation " + moduleFinalName,
-					resolveContext,
-					callback
-				);
-			});
-	}
+        const moduleFinalName = moduleName + this.appending;
+        const obj = Object.assign({}, request, {
+          request: moduleFinalName + remainingRequest
+        });
+        resolver.doResolve(
+          target, // module
+          obj,
+          "module variation " + moduleFinalName,
+          resolveContext,
+          callback
+        );
+      });
+  }
 };
 ```
 :::
@@ -1230,26 +1230,26 @@ ModuleAppendPlugin 的作用是用来拼接 moduleExtensions，在早期的 webp
 :::details TryNextPlugin.js
 ```js
 module.exports = class TryNextPlugin {
-	constructor(source, message, target) {
-		this.source = source;
-		this.message = message;
-		this.target = target;
-	}
+  constructor(source, message, target) {
+    this.source = source;
+    this.message = message;
+    this.target = target;
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source) // rawModule
-			.tapAsync("TryNextPlugin", (request, resolveContext, callback) => {
-				resolver.doResolve(
-					target, // module
-					request,
-					this.message,
-					resolveContext,
-					callback
-				);
-			});
-	}
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source) // rawModule
+      .tapAsync("TryNextPlugin", (request, resolveContext, callback) => {
+        resolver.doResolve(
+          target, // module
+          request,
+          this.message,
+          resolveContext,
+          callback
+        );
+      });
+  }
 };
 ```
 :::
@@ -1276,25 +1276,25 @@ modules = mergeFilteredToArray([].concat(modules), item => {
 // 处理之后就变成 ['/User/abc', ['node_modules', 'another_node_modules']]
 // 数组的第一个丢给 ModulesInRootPlugin，数组的第二个丢给 ModulesInHierachicDirectoriesPlugin
 function mergeFilteredToArray(array, filter) {
-	return array.reduce((array, item) => {
-		if (filter(item)) {
-			const lastElement = array[array.length - 1];
-			if (Array.isArray(lastElement)) {
-				lastElement.push(item);
-			} else {
-				array.push([item]);
-			}
-			return array;
-		} else {
-			array.push(item);
-			return array;
-		}
-	}, []);
+  return array.reduce((array, item) => {
+    if (filter(item)) {
+      const lastElement = array[array.length - 1];
+      if (Array.isArray(lastElement)) {
+        lastElement.push(item);
+      } else {
+        array.push([item]);
+      }
+      return array;
+    } else {
+      array.push(item);
+      return array;
+    }
+  }, []);
 }
 
 // 判断是windows 或者 linux macOS 的绝对路径
 function isAbsolutePath(path) {
-	return /^[A-Z]:|^\//.test(path);
+  return /^[A-Z]:|^\//.test(path);
 }
 
 modules.forEach(item => {
@@ -1311,87 +1311,87 @@ modules.forEach(item => {
 :::details ModulesInHierachicDirectoriesPlugin.js
 ```js
 module.exports = class ModulesInHierachicDirectoriesPlugin {
-	constructor(source, directories, target) {
-		this.source = source;
-		this.directories = [].concat(directories); // 默认是 ['node_modules']
-		this.target = target;
-	}
+  constructor(source, directories, target) {
+    this.source = source;
+    this.directories = [].concat(directories); // 默认是 ['node_modules']
+    this.target = target;
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync(
-				"ModulesInHierachicDirectoriesPlugin",
-				(request, resolveContext, callback) => {
-					const fs = resolver.fileSystem;
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync(
+        "ModulesInHierachicDirectoriesPlugin",
+        (request, resolveContext, callback) => {
+          const fs = resolver.fileSystem;
           // 获取所有需要搜寻的目录，比如当前路径是 '/a/b/c'
           // 得到路径 ['/a/b/c/node_modules', '/a/b/node_modules', '/a/node_modules', '/node_modules']
-					const addrs = getPaths(request.path)
-						.paths.map(p => {
-							return this.directories.map(d => resolver.join(p, d));
-						})
-						.reduce((array, p) => {
-							array.push.apply(array, p);
-							return array;
-						}, []);
+          const addrs = getPaths(request.path)
+            .paths.map(p => {
+              return this.directories.map(d => resolver.join(p, d));
+            })
+            .reduce((array, p) => {
+              array.push.apply(array, p);
+              return array;
+            }, []);
           // 遍历 addrs
-					forEachBail(
-						addrs,
-						(addr, callback) => {
-							fs.stat(addr, (err, stat) => {
-								if (!err && stat && stat.isDirectory()) {
-									const obj = Object.assign({}, request, {
-										path: addr,
-										request: "./" + request.request
-									});
-									const message = "looking for modules in " + addr;
+          forEachBail(
+            addrs,
+            (addr, callback) => {
+              fs.stat(addr, (err, stat) => {
+                if (!err && stat && stat.isDirectory()) {
+                  const obj = Object.assign({}, request, {
+                    path: addr,
+                    request: "./" + request.request
+                  });
+                  const message = "looking for modules in " + addr;
                   // 如果当前路径的存在，从 resolve 发起一轮新的路径解析
                   // 如果找到了对应的文件，会根据优先级，决定是否执行 tapAsyncCallback 的 callback
-									return resolver.doResolve(
-										target,
-										obj,
-										message,
-										resolveContext,
-										callback
-									);
-								}
-								if (resolveContext.log)
-									resolveContext.log(
-										addr + " doesn't exist or is not a directory"
-									);
-								if (resolveContext.missing) resolveContext.missing.add(addr);
-								return callback();
-							});
-						},
-						callback
-					);
-				}
-			);
-	}
+                  return resolver.doResolve(
+                    target,
+                    obj,
+                    message,
+                    resolveContext,
+                    callback
+                  );
+                }
+                if (resolveContext.log)
+                  resolveContext.log(
+                    addr + " doesn't exist or is not a directory"
+                  );
+                if (resolveContext.missing) resolveContext.missing.add(addr);
+                return callback();
+              });
+            },
+            callback
+          );
+        }
+      );
+  }
 };
 
 // 获取当前路径需要遍历的路径，比如路径 '/a/b/c'
 // 得到路径 ['/a/b/c', '/a/b', '/a', '/']
 function getPaths(path) {
-	const parts = path.split(/(.*?[\\/]+)/);
-	const paths = [path];
-	const seqments = [parts[parts.length - 1]];
-	let part = parts[parts.length - 1];
-	path = path.substr(0, path.length - part.length - 1);
-	for (let i = parts.length - 2; i > 2; i -= 2) {
-		paths.push(path);
-		part = parts[i];
-		path = path.substr(0, path.length - part.length) || "/";
-		seqments.push(part.substr(0, part.length - 1));
-	}
-	part = parts[1];
-	seqments.push(part);
-	paths.push(part);
-	return {
-		paths: paths,
-		seqments: seqments
-	};
+  const parts = path.split(/(.*?[\\/]+)/);
+  const paths = [path];
+  const seqments = [parts[parts.length - 1]];
+  let part = parts[parts.length - 1];
+  path = path.substr(0, path.length - part.length - 1);
+  for (let i = parts.length - 2; i > 2; i -= 2) {
+    paths.push(path);
+    part = parts[i];
+    path = path.substr(0, path.length - part.length) || "/";
+    seqments.push(part.substr(0, part.length - 1));
+  }
+  part = parts[1];
+  seqments.push(part);
+  paths.push(part);
+  return {
+    paths: paths,
+    seqments: seqments
+  };
 };
 ```
 :::
@@ -1400,46 +1400,46 @@ forEachBail 的功能是遍历所有的 addrs，其中内部的逻辑会保证�
 
 ```js
 module.exports = function forEachBail(array, iterator, callback) {
-	if (array.length === 0) return callback();
+  if (array.length === 0) return callback();
   // currentPos 默认为数组的最大值 
-	let currentPos = array.length;
-	let currentResult;
-	let done = [];
+  let currentPos = array.length;
+  let currentResult;
+  let done = [];
   // 遍历数组
-	for (let i = 0; i < array.length; i++) {
-		const itCb = createIteratorCallback(i);
+  for (let i = 0; i < array.length; i++) {
+    const itCb = createIteratorCallback(i);
     // iterator 必须调用 itCb，并且它的入参决定了 callback 的调用时机
-		iterator(array[i], itCb);
-		if (currentPos === 0) break;
-	}
+    iterator(array[i], itCb);
+    if (currentPos === 0) break;
+  }
 
-	function createIteratorCallback(i) {
+  function createIteratorCallback(i) {
     // args 是调用上述 itCb 的入参
-		return (...args) => {
+    return (...args) => {
       // 如果后续优先级低的数组元素调用了 itCb，直接忽略
       // 因为优先级高的数组元素已经返回了对应的值
-			if (i >= currentPos) return; // ignore
+      if (i >= currentPos) return; // ignore
       // 记录当前已经调用过 itCb 的数组元素
-			done.push(i);
+      done.push(i);
       // args 不为 0，代表当前的数组元素调用 itCb 传入了对应的数据
-			if (args.length > 0) {
+      if (args.length > 0) {
         // 标记当前数组元素
-				currentPos = i + 1;
+        currentPos = i + 1;
         // 找出优先级比当前数组元素还大的其他元素
-				done = done.filter(item => {
-					return item <= i;
-				});
+        done = done.filter(item => {
+          return item <= i;
+        });
         // 更新结果
-				currentResult = args;
-			}
+        currentResult = args;
+      }
       // 如果当前的数组元素已经是优先级最高的元素，那么直接返回它对应的结果
-			if (done.length === currentPos) {
-				callback.apply(null, currentResult);
+      if (done.length === currentPos) {
+        callback.apply(null, currentResult);
         // 设置为 0，是为了阻断后续所有的元素，因为会走到上述的 if(i >= currentPos) 逻辑
-				currentPos = 0;
-			}
-		};
-	}
+        currentPos = 0;
+      }
+    };
+  }
 };
 ```
 
@@ -1460,32 +1460,32 @@ module.exports = {
 :::details ModulesInRootPlugin.js
 ```js
 module.exports = class ModulesInRootPlugin {
-	constructor(source, path, target) {
-		this.source = source;
-		this.path = path;
-		this.target = target;
-	}
+  constructor(source, path, target) {
+    this.source = source;
+    this.path = path;
+    this.target = target;
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source) // module
-			.tapAsync("ModulesInRootPlugin", (request, resolveContext, callback) => {
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source) // module
+      .tapAsync("ModulesInRootPlugin", (request, resolveContext, callback) => {
         // 修改 path 以及 request
-				const obj = Object.assign({}, request, {
-					path: this.path, // 配置的绝对路径
-					request: "./" + request.request
-				});
+        const obj = Object.assign({}, request, {
+          path: this.path, // 配置的绝对路径
+          request: "./" + request.request
+        });
         // 从 resolve 钩子重新发起一轮路径解析
-				resolver.doResolve(
-					target, // resolve
-					obj,
-					"looking for modules in " + this.path,
-					resolveContext,
-					callback
-				);
-			});
-	}
+        resolver.doResolve(
+          target, // resolve
+          obj,
+          "looking for modules in " + this.path,
+          resolveContext,
+          callback
+        );
+      });
+  }
 };
 
 ```
@@ -1504,67 +1504,67 @@ ModulesInRootPlugin 逻辑非常简单，因为它接收的 path 参数已经是
 :::details DescriptionFilePlugin.js
 ```js
 module.exports = class DescriptionFilePlugin {
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source) // relative
-			.tapAsync(
-				"DescriptionFilePlugin",
-				(request, resolveContext, callback) => {
-					const directory = request.path;
-					DescriptionFileUtils.loadDescriptionFile(
-						resolver,
-						directory,
-						this.filenames,
-						resolveContext,
-						(err, result) => {
-							if (err) return callback(err);
-							if (!result) {
-								if (resolveContext.missing) {
-									this.filenames.forEach(filename => {
-										resolveContext.missing.add(
-											resolver.join(directory, filename)
-										);
-									});
-								}
-								if (resolveContext.log)
-									resolveContext.log("No description file found");
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source) // relative
+      .tapAsync(
+        "DescriptionFilePlugin",
+        (request, resolveContext, callback) => {
+          const directory = request.path;
+          DescriptionFileUtils.loadDescriptionFile(
+            resolver,
+            directory,
+            this.filenames,
+            resolveContext,
+            (err, result) => {
+              if (err) return callback(err);
+              if (!result) {
+                if (resolveContext.missing) {
+                  this.filenames.forEach(filename => {
+                    resolveContext.missing.add(
+                      resolver.join(directory, filename)
+                    );
+                  });
+                }
+                if (resolveContext.log)
+                  resolveContext.log("No description file found");
                 // 如果没找到 description file，进入下一个 tapAsyncCallback，也就是 NextPlugin 内部
-								return callback();
-							}
-							const relativePath =
-								"." +
-								request.path
-									.substr(result.directory.length)
-									.replace(/\\/g, "/");
-							const obj = Object.assign({}, request, {
-								descriptionFilePath: result.path,
-								descriptionFileData: result.content,
-								descriptionFileRoot: result.directory,
-								relativePath: relativePath
-							});
-							resolver.doResolve(
-								target, // describedRelative
-								obj,
-								"using description file: " +
-									result.path +
-									" (relative path: " +
-									relativePath +
-									")",
-								resolveContext,
-								(err, result) => {
-									if (err) return callback(err);
+                return callback();
+              }
+              const relativePath =
+                "." +
+                request.path
+                  .substr(result.directory.length)
+                  .replace(/\\/g, "/");
+              const obj = Object.assign({}, request, {
+                descriptionFilePath: result.path,
+                descriptionFileData: result.content,
+                descriptionFileRoot: result.directory,
+                relativePath: relativePath
+              });
+              resolver.doResolve(
+                target, // describedRelative
+                obj,
+                "using description file: " +
+                  result.path +
+                  " (relative path: " +
+                  relativePath +
+                  ")",
+                resolveContext,
+                (err, result) => {
+                  if (err) return callback(err);
 
-									// Don't allow other processing
-									if (result === undefined) return callback(null, null);
-									callback(null, result);
-								}
-							);
-						}
-					);
-				}
-			);
-	}
+                  // Don't allow other processing
+                  if (result === undefined) return callback(null, null);
+                  callback(null, result);
+                }
+              );
+            }
+          );
+        }
+      );
+  }
 };
 ```
 :::
@@ -1594,19 +1594,19 @@ request = {
 :::details NextPlugin.js
 ```js
 module.exports = class NextPlugin {
-	constructor(source, target) {
-		this.source = source; // relative
-		this.target = target; // describedRelative
-	}
+  constructor(source, target) {
+    this.source = source; // relative
+    this.target = target; // describedRelative
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync("NextPlugin", (request, resolveContext, callback) => {
-				resolver.doResolve(target, request, null, resolveContext, callback);
-			});
-	}
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync("NextPlugin", (request, resolveContext, callback) => {
+        resolver.doResolve(target, request, null, resolveContext, callback);
+      });
+  }
 };
 ```
 :::
@@ -1620,26 +1620,26 @@ NextPlugin 只是用来将流程推向 describedRelative hook。
 :::details FileKindPlugin.js
 ```js
 module.exports = class FileKindPlugin {
-	constructor(source, target) {
-		this.source = source; // describedRelative
-		this.target = target; // rawFile
-	}
+  constructor(source, target) {
+    this.source = source; // describedRelative
+    this.target = target; // rawFile
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync("FileKindPlugin", (request, resolveContext, callback) => {
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync("FileKindPlugin", (request, resolveContext, callback) => {
         // 判断请求是否是 directory 类型，在执行 ParsePlugin 的时候会鉴定
         // 比如 './a/module/' 就是 directory 类型
-				if (request.directory) return callback(); // 走进 TryNextPlugin
-				const obj = Object.assign({}, request);
+        if (request.directory) return callback(); // 走进 TryNextPlugin
+        const obj = Object.assign({}, request);
         // 删除 directory 信息
-				delete obj.directory;
+        delete obj.directory;
         // 流程推向 rawFile hook
-				resolver.doResolve(target, obj, null, resolveContext, callback);
-			});
-	}
+        resolver.doResolve(target, obj, null, resolveContext, callback);
+      });
+  }
 };
 
 ```
@@ -1652,26 +1652,26 @@ module.exports = class FileKindPlugin {
 :::details TryNextPlugin.js
 ```js
 module.exports = class TryNextPlugin {
-	constructor(source, message, target) {
-		this.source = source; // describedRelative
-		this.message = message;
-		this.target = target; // directory
-	}
+  constructor(source, message, target) {
+    this.source = source; // describedRelative
+    this.message = message;
+    this.target = target; // directory
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync("TryNextPlugin", (request, resolveContext, callback) => {
-				resolver.doResolve(
-					target,
-					request,
-					this.message,
-					resolveContext,
-					callback
-				);
-			});
-	}
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync("TryNextPlugin", (request, resolveContext, callback) => {
+        resolver.doResolve(
+          target,
+          request,
+          this.message,
+          resolveContext,
+          callback
+        );
+      });
+  }
 };
 ```
 :::
@@ -1687,47 +1687,47 @@ TryNextPlugin 会将流程推向 directory hook。
 :::details DirectoryExistsPlugin.js
 ```js
 module.exports = class DirectoryExistsPlugin {
-	constructor(source, target) {
-		this.source = source; // directory
-		this.target = target; // existingDirectory
-	}
+  constructor(source, target) {
+    this.source = source; // directory
+    this.target = target; // existingDirectory
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync(
-				"DirectoryExistsPlugin",
-				(request, resolveContext, callback) => {
-					const fs = resolver.fileSystem;
-					const directory = request.path;
-					fs.stat(directory, (err, stat) => {
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync(
+        "DirectoryExistsPlugin",
+        (request, resolveContext, callback) => {
+          const fs = resolver.fileSystem;
+          const directory = request.path;
+          fs.stat(directory, (err, stat) => {
             // 如果出错，没有此目录或者此文件，则退回到 describedRelative 的 callAsyncCallback
-						if (err || !stat) {
-							if (resolveContext.missing) resolveContext.missing.add(directory);
-							if (resolveContext.log)
-								resolveContext.log(directory + " doesn't exist");
-							return callback();
-						}
+            if (err || !stat) {
+              if (resolveContext.missing) resolveContext.missing.add(directory);
+              if (resolveContext.log)
+                resolveContext.log(directory + " doesn't exist");
+              return callback();
+            }
             // 如果路径不是一个目录，则退回到 describedRelative 的 callAsyncCallback
-						if (!stat.isDirectory()) {
-							if (resolveContext.missing) resolveContext.missing.add(directory);
-							if (resolveContext.log)
-								resolveContext.log(directory + " is not a directory");
-							return callback();
-						}
+            if (!stat.isDirectory()) {
+              if (resolveContext.missing) resolveContext.missing.add(directory);
+              if (resolveContext.log)
+                resolveContext.log(directory + " is not a directory");
+              return callback();
+            }
             // 将流程推向 existingDirectory hook
-						resolver.doResolve(
-							target,
-							request,
-							"existing directory",
-							resolveContext,
-							callback
-						);
-					});
-				}
-			);
-	}
+            resolver.doResolve(
+              target,
+              request,
+              "existing directory",
+              resolveContext,
+              callback
+            );
+          });
+        }
+      );
+  }
 };
 ```
 :::
@@ -1748,19 +1748,19 @@ const resolveToContext = options.resolveToContext || false;
 :::details NextPlugin.js
 ```js
 module.exports = class NextPlugin {
-	constructor(source, target) {
-		this.source = source; // existingDirectory
-		this.target = target; // resolved
-	}
+  constructor(source, target) {
+    this.source = source; // existingDirectory
+    this.target = target; // resolved
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync("NextPlugin", (request, resolveContext, callback) => {
-				resolver.doResolve(target, request, null, resolveContext, callback);
-			});
-	}
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync("NextPlugin", (request, resolveContext, callback) => {
+        resolver.doResolve(target, request, null, resolveContext, callback);
+      });
+  }
 };
 ```
 :::
@@ -1787,45 +1787,45 @@ const enableConcord = options.concord || false;
 :::details ConcordMainPlugin.js
 ```js
 module.exports = class ConcordMainPlugin {
-	constructor(source, options, target) {
-		this.source = source; // existingDirectory
-		this.options = options;
-		this.target = target; // resolve
-	}
+  constructor(source, options, target) {
+    this.source = source; // existingDirectory
+    this.options = options;
+    this.target = target; // resolve
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync("ConcordMainPlugin", (request, resolveContext, callback) => {
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync("ConcordMainPlugin", (request, resolveContext, callback) => {
         // 请求路径必须含有自己的 package.json
         // 比如 request.path 为 '/a/b'，那么 b 目录下必须得有 package.json
-				if (request.path !== request.descriptionFileRoot) return callback();
+        if (request.path !== request.descriptionFileRoot) return callback();
         // 获取 concord 字段
-				const concordField = DescriptionFileUtils.getField(
-					request.descriptionFileData,
-					"concord"
-				);
+        const concordField = DescriptionFileUtils.getField(
+          request.descriptionFileData,
+          "concord"
+        );
         // 如果不存在，就执行下一个 tapAsyncCallback，也就是 MainFieldPlugin
-				if (!concordField) return callback();
+        if (!concordField) return callback();
         // 获取 concord.main
-				const mainModule = concord.getMain(request.context, concordField);
+        const mainModule = concord.getMain(request.context, concordField);
         // 如果不存在，就执行下一个 tapAsyncCallback，也就是 MainFieldPlugin
-				if (!mainModule) return callback();
+        if (!mainModule) return callback();
         // 从 resolve 钩子发起一轮新的路径解析
-				const obj = Object.assign({}, request, {
-					request: mainModule
-				});
-				const filename = path.basename(request.descriptionFilePath);
-				return resolver.doResolve(
-					target,
-					obj,
-					"use " + mainModule + " from " + filename,
-					resolveContext,
-					callback
-				);
-			});
-	}
+        const obj = Object.assign({}, request, {
+          request: mainModule
+        });
+        const filename = path.basename(request.descriptionFilePath);
+        return resolver.doResolve(
+          target,
+          obj,
+          "use " + mainModule + " from " + filename,
+          resolveContext,
+          callback
+        );
+      });
+  }
 };
 ```
 :::
@@ -1843,52 +1843,52 @@ let mainFields = options.mainFields || ["main"];
 :::details MainFieldPlugin.js
 ```js
 function MainFieldPlugin(source, options, target) {
-	this.source = source; // existingDirectory
-	this.options = options;
-	this.target = target; // resolve
+  this.source = source; // existingDirectory
+  this.options = options;
+  this.target = target; // resolve
 }
 module.exports = MainFieldPlugin;
 
 MainFieldPlugin.prototype.apply = function(resolver) {
-	var target = this.target;
-	var options = this.options;
-	resolver.plugin(this.source, function mainField(request, callback) {
+  var target = this.target;
+  var options = this.options;
+  resolver.plugin(this.source, function mainField(request, callback) {
     // 引用的模块必须有自己的 package.json 文件
-		if(request.path !== request.descriptionFileRoot) return callback();
+    if(request.path !== request.descriptionFileRoot) return callback();
     // package.json 的文件内容
-		var content = request.descriptionFileData;
-		var filename = path.basename(request.descriptionFilePath);
-		var mainModule;
+    var content = request.descriptionFileData;
+    var filename = path.basename(request.descriptionFilePath);
+    var mainModule;
     // mainField 字段名称，数组或者字符串
-		var field = options.name;
-		if(Array.isArray(field)) {
-			var current = content;
-			for(var j = 0; j < field.length; j++) {
-				if(current === null || typeof current !== "object") {
-					current = null;
-					break;
-				}
-				current = current[field[j]];
-			}
-			if(typeof current === "string") {
-				mainModule = current;
-			}
-		} else {
+    var field = options.name;
+    if(Array.isArray(field)) {
+      var current = content;
+      for(var j = 0; j < field.length; j++) {
+        if(current === null || typeof current !== "object") {
+          current = null;
+          break;
+        }
+        current = current[field[j]];
+      }
+      if(typeof current === "string") {
+        mainModule = current;
+      }
+    } else {
       // 绝大部分情况都是字符串
-			if(typeof content[field] === "string") {
-				mainModule = content[field];
-			}
-		}
-		if(!mainModule) return callback();
+      if(typeof content[field] === "string") {
+        mainModule = content[field];
+      }
+    }
+    if(!mainModule) return callback();
     // 修改请求，变成相对路径
-		if(options.forceRelative && !/^\.\.?\//.test(mainModule))
-			mainModule = "./" + mainModule;
-		var obj = Object.assign({}, request, {
-			request: mainModule
-		});
+    if(options.forceRelative && !/^\.\.?\//.test(mainModule))
+      mainModule = "./" + mainModule;
+    var obj = Object.assign({}, request, {
+      request: mainModule
+    });
     // 流程推向 resolve 钩子，发起新一轮的路径解析
-		return resolver.doResolve(target, obj, "use " + mainModule + " from " + options.name + " in " + filename, callback);
-	});
+    return resolver.doResolve(target, obj, "use " + mainModule + " from " + options.name + " in " + filename, callback);
+  });
 };
 ```
 :::
@@ -1914,35 +1914,35 @@ let mainFiles = options.mainFiles || ["index"];
 :::details UseFilePlugin.js
 ```js
 module.exports = class UseFilePlugin {
-	constructor(source, filename, target) {
-		this.source = source; // existingDirectory
-		this.filename = filename;
-		this.target = target; // undescribedRawFile
-	}
+  constructor(source, filename, target) {
+    this.source = source; // existingDirectory
+    this.filename = filename;
+    this.target = target; // undescribedRawFile
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync("UseFilePlugin", (request, resolveContext, callback) => {
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync("UseFilePlugin", (request, resolveContext, callback) => {
         // 拼接路径
-				const filePath = resolver.join(request.path, this.filename);
-				const obj = Object.assign({}, request, {
-					path: filePath,
-					relativePath:
-						request.relativePath &&
-						resolver.join(request.relativePath, this.filename)
-				});
+        const filePath = resolver.join(request.path, this.filename);
+        const obj = Object.assign({}, request, {
+          path: filePath,
+          relativePath:
+            request.relativePath &&
+            resolver.join(request.relativePath, this.filename)
+        });
         // 流程转向 undescribedRawFile hook
-				resolver.doResolve(
-					target,
-					obj,
-					"using path: " + filePath,
-					resolveContext,
-					callback
-				);
-			});
-	}
+        resolver.doResolve(
+          target,
+          obj,
+          "using path: " + filePath,
+          resolveContext,
+          callback
+        );
+      });
+  }
 };
 ```
 :::
@@ -1958,69 +1958,69 @@ UseFilePlugin 的作用是拼接 path 与 mainFiles 字段，比如请求是 `'.
 :::details DescriptionFilePlugin.js
 ```js
 module.exports = class DescriptionFilePlugin {
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source) // undescribedRawFile
-			.tapAsync(
-				"DescriptionFilePlugin",
-				(request, resolveContext, callback) => {
-					const directory = request.path;
-					DescriptionFileUtils.loadDescriptionFile(
-						resolver,
-						directory,
-						this.filenames,
-						resolveContext,
-						(err, result) => {
-							if (err) return callback(err);
-							if (!result) {
-								if (resolveContext.missing) {
-									this.filenames.forEach(filename => {
-										resolveContext.missing.add(
-											resolver.join(directory, filename)
-										);
-									});
-								}
-								if (resolveContext.log)
-									resolveContext.log("No description file found");
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source) // undescribedRawFile
+      .tapAsync(
+        "DescriptionFilePlugin",
+        (request, resolveContext, callback) => {
+          const directory = request.path;
+          DescriptionFileUtils.loadDescriptionFile(
+            resolver,
+            directory,
+            this.filenames,
+            resolveContext,
+            (err, result) => {
+              if (err) return callback(err);
+              if (!result) {
+                if (resolveContext.missing) {
+                  this.filenames.forEach(filename => {
+                    resolveContext.missing.add(
+                      resolver.join(directory, filename)
+                    );
+                  });
+                }
+                if (resolveContext.log)
+                  resolveContext.log("No description file found");
                 // 如果没找到 description file，进入下一个 tapAsyncCallback，也就是 NextPlugin 内部
-								return callback();
-							}
+                return callback();
+              }
               // 由于 UseFilePlugin 修改了 request，所以需要更新 relativePath
-							const relativePath =
-								"." +
-								request.path
-									.substr(result.directory.length)
-									.replace(/\\/g, "/");
-							const obj = Object.assign({}, request, {
-								descriptionFilePath: result.path,
-								descriptionFileData: result.content,
-								descriptionFileRoot: result.directory,
-								relativePath: relativePath
-							});
+              const relativePath =
+                "." +
+                request.path
+                  .substr(result.directory.length)
+                  .replace(/\\/g, "/");
+              const obj = Object.assign({}, request, {
+                descriptionFilePath: result.path,
+                descriptionFileData: result.content,
+                descriptionFileRoot: result.directory,
+                relativePath: relativePath
+              });
               // 流程转向 rawFile hook
-							resolver.doResolve(
-								target, // rawFile
-								obj,
-								"using description file: " +
-									result.path +
-									" (relative path: " +
-									relativePath +
-									")",
-								resolveContext,
-								(err, result) => {
-									if (err) return callback(err);
+              resolver.doResolve(
+                target, // rawFile
+                obj,
+                "using description file: " +
+                  result.path +
+                  " (relative path: " +
+                  relativePath +
+                  ")",
+                resolveContext,
+                (err, result) => {
+                  if (err) return callback(err);
 
-									// Don't allow other processing
-									if (result === undefined) return callback(null, null);
-									callback(null, result);
-								}
-							);
-						}
-					);
-				}
-			);
-	}
+                  // Don't allow other processing
+                  if (result === undefined) return callback(null, null);
+                  callback(null, result);
+                }
+              );
+            }
+          );
+        }
+      );
+  }
 };
 ```
 :::
@@ -2033,19 +2033,19 @@ DescriptionFilePlugin 在这里又被重复使用了，是因为 UseFilePlugin �
 ```js
 
 module.exports = class NextPlugin {
-	constructor(source, target) {
-		this.source = source; // undescribedRawFile
-		this.target = target; // rawFile
-	}
+  constructor(source, target) {
+    this.source = source; // undescribedRawFile
+    this.target = target; // rawFile
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync("NextPlugin", (request, resolveContext, callback) => {
-				resolver.doResolve(target, request, null, resolveContext, callback);
-			});
-	}
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync("NextPlugin", (request, resolveContext, callback) => {
+        resolver.doResolve(target, request, null, resolveContext, callback);
+      });
+  }
 };
 ```
 :::
@@ -2089,28 +2089,28 @@ import './a' // 不报错，找到 './a.js'
 :::details TryNextPlugin.js
 ```js
 module.exports = class TryNextPlugin {
-	constructor(source, message, target) {
-		this.source = source; // rawFile
-		this.message = message;
-		this.target = target; // file
-	}
+  constructor(source, message, target) {
+    this.source = source; // rawFile
+    this.message = message;
+    this.target = target; // file
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync("TryNextPlugin", (request, resolveContext, callback) => {
-				// 流程转向 file hook，如果 调用 callback 的时候没有传入参数
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync("TryNextPlugin", (request, resolveContext, callback) => {
+        // 流程转向 file hook，如果 调用 callback 的时候没有传入参数
         // 代表进入下一个 tapAsyncCallback，也就是 ConcordExtensionsPlugin 内部
-				resolver.doResolve(
-					target,
-					request,
-					this.message,
-					resolveContext,
-					callback
-				);
-			});
-	}
+        resolver.doResolve(
+          target,
+          request,
+          this.message,
+          resolveContext,
+          callback
+        );
+      });
+  }
 };
 ```
 :::
@@ -2138,62 +2138,62 @@ TryNextPlugin 的作用是将流程推向 file hook，也就是说先不带 exte
 :::details ConcordExtensionsPlugin.js
 ```js
 module.exports = class ConcordExtensionsPlugin {
-	constructor(source, options, target) {
-		this.source = source; // rawFile
-		this.options = options; // {}
-		this.target = target; // file
-	}
+  constructor(source, options, target) {
+    this.source = source; // rawFile
+    this.options = options; // {}
+    this.target = target; // file
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync(
-				"ConcordExtensionsPlugin",
-				(request, resolveContext, callback) => {
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync(
+        "ConcordExtensionsPlugin",
+        (request, resolveContext, callback) => {
           // 从 package.json 取出 concord 字段
-					const concordField = DescriptionFileUtils.getField(
-						request.descriptionFileData,
-						"concord"
-					);
+          const concordField = DescriptionFileUtils.getField(
+            request.descriptionFileData,
+            "concord"
+          );
           // 如果不存在，进入下一个 tapAsyncCallback，也就是 AppendPlugin 内部
-					if (!concordField) return callback();
+          if (!concordField) return callback();
           // 取出 concord.extensions 字段
-					const extensions = concord.getExtensions(
-						request.context,
-						concordField
-					);
+          const extensions = concord.getExtensions(
+            request.context,
+            concordField
+          );
           // 如果不存在，进入下一个 tapAsyncCallback，也就是 AppendPlugin 内部
-					if (!extensions) return callback();
-					forEachBail(
-						extensions,
-						(appending, callback) => {
+          if (!extensions) return callback();
+          forEachBail(
+            extensions,
+            (appending, callback) => {
               // 拼接 extension
-							const obj = Object.assign({}, request, {
-								path: request.path + appending,
-								relativePath:
-									request.relativePath && request.relativePath + appending
-							});
+              const obj = Object.assign({}, request, {
+                path: request.path + appending,
+                relativePath:
+                  request.relativePath && request.relativePath + appending
+              });
               // 将流程推向 file hook
-							resolver.doResolve(
-								target,
-								obj,
-								"concord extension: " + appending,
-								resolveContext,
-								callback
-							);
-						},
-						(err, result) => {
-							if (err) return callback(err);
+              resolver.doResolve(
+                target,
+                obj,
+                "concord extension: " + appending,
+                resolveContext,
+                callback
+              );
+            },
+            (err, result) => {
+              if (err) return callback(err);
 
-							// 跳过后续所有的 tapAsyncCallback，也就是 AppendPlugin
-							if (result === undefined) return callback(null, null);
-							callback(null, result);
-						}
-					);
-				}
-			);
-	}
+              // 跳过后续所有的 tapAsyncCallback，也就是 AppendPlugin
+              if (result === undefined) return callback(null, null);
+              callback(null, result);
+            }
+          );
+        }
+      );
+  }
 };
 ```
 :::
@@ -2205,32 +2205,32 @@ module.exports = class ConcordExtensionsPlugin {
 :::details AppendPlugin.js
 ```js
 module.exports = class AppendPlugin {
-	constructor(source, appending, target) {
-		this.source = source; // rawFile
-		this.appending = appending; // ".js" | ".json" | ".node"
-		this.target = target; // file
-	}
+  constructor(source, appending, target) {
+    this.source = source; // rawFile
+    this.appending = appending; // ".js" | ".json" | ".node"
+    this.target = target; // file
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		resolver
-			.getHook(this.source)
-			.tapAsync("AppendPlugin", (request, resolveContext, callback) => {
-				const obj = Object.assign({}, request, {
-					path: request.path + this.appending, // 拼接 extension
-					relativePath:
-						request.relativePath && request.relativePath + this.appending
-				});
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    resolver
+      .getHook(this.source)
+      .tapAsync("AppendPlugin", (request, resolveContext, callback) => {
+        const obj = Object.assign({}, request, {
+          path: request.path + this.appending, // 拼接 extension
+          relativePath:
+            request.relativePath && request.relativePath + this.appending
+        });
         // 流程推向 file hook
-				resolver.doResolve(
-					target,
-					obj,
-					this.appending,
-					resolveContext,
-					callback
-				);
-			});
-	}
+        resolver.doResolve(
+          target,
+          obj,
+          this.appending,
+          resolveContext,
+          callback
+        );
+      });
+  }
 };
 ```
 :::
@@ -2250,63 +2250,63 @@ module.exports = class AppendPlugin {
 :::details SymlinkPlugin.js
 ```js
 module.exports = class SymlinkPlugin {
-	constructor(source, target) {
-		this.source = source; // file
-		this.target = target; // relative
-	}
+  constructor(source, target) {
+    this.source = source; // file
+    this.target = target; // relative
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		const fs = resolver.fileSystem;
-		resolver
-			.getHook(this.source)
-			.tapAsync("SymlinkPlugin", (request, resolveContext, callback) => {
-				const pathsResult = getPaths(request.path);
-				const pathSeqments = pathsResult.seqments;
-				const paths = pathsResult.paths;
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    const fs = resolver.fileSystem;
+    resolver
+      .getHook(this.source)
+      .tapAsync("SymlinkPlugin", (request, resolveContext, callback) => {
+        const pathsResult = getPaths(request.path);
+        const pathSeqments = pathsResult.seqments;
+        const paths = pathsResult.paths;
 
-				let containsSymlink = false;
+        let containsSymlink = false;
         // 遍历当前路径上可能存在符号链接的路径
-				forEachBail.withIndex(
-					paths,
-					(path, idx, callback) => {
-						fs.readlink(path, (err, result) => {
-							if (!err && result) {
-								pathSeqments[idx] = result;
-								containsSymlink = true;
-								// Shortcut when absolute symlink found
-								if (/^(\/|[a-zA-Z]:($|\\))/.test(result))
-									return callback(null, idx);
-							}
-							callback();
-						});
-					},
-					(err, idx) => {
+        forEachBail.withIndex(
+          paths,
+          (path, idx, callback) => {
+            fs.readlink(path, (err, result) => {
+              if (!err && result) {
+                pathSeqments[idx] = result;
+                containsSymlink = true;
+                // Shortcut when absolute symlink found
+                if (/^(\/|[a-zA-Z]:($|\\))/.test(result))
+                  return callback(null, idx);
+              }
+              callback();
+            });
+          },
+          (err, idx) => {
             // 没有符号链接，进入下一个 tapAsyncCallback，也就是 FileExistsPlugin 内部
-						if (!containsSymlink) return callback();
-						const resultSeqments =
-							typeof idx === "number"
-								? pathSeqments.slice(0, idx + 1)
-								: pathSeqments.slice();
+            if (!containsSymlink) return callback();
+            const resultSeqments =
+              typeof idx === "number"
+                ? pathSeqments.slice(0, idx + 1)
+                : pathSeqments.slice();
             // 拼接真实的路径
-						const result = resultSeqments.reverse().reduce((a, b) => {
-							return resolver.join(a, b);
-						});
-						const obj = Object.assign({}, request, {
-							path: result
-						});
+            const result = resultSeqments.reverse().reduce((a, b) => {
+              return resolver.join(a, b);
+            });
+            const obj = Object.assign({}, request, {
+              path: result
+            });
             // 流程推向 relative
-						resolver.doResolve(
-							target,
-							obj,
-							"resolved symlink to " + result,
-							resolveContext,
-							callback
-						);
-					}
-				);
-			});
-	}
+            resolver.doResolve(
+              target,
+              obj,
+              "resolved symlink to " + result,
+              resolveContext,
+              callback
+            );
+          }
+        );
+      });
+  }
 };
 
 ```
@@ -2319,42 +2319,42 @@ module.exports = class SymlinkPlugin {
 :::details FileExistsPlugin.js
 ```js
 module.exports = class FileExistsPlugin {
-	constructor(source, target) {
-		this.source = source; // file
-		this.target = target; // existingFile
-	}
+  constructor(source, target) {
+    this.source = source; // file
+    this.target = target; // existingFile
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
-		const fs = resolver.fileSystem;
-		resolver
-			.getHook(this.source)
-			.tapAsync("FileExistsPlugin", (request, resolveContext, callback) => {
-				const file = request.path;
-				fs.stat(file, (err, stat) => {
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
+    const fs = resolver.fileSystem;
+    resolver
+      .getHook(this.source)
+      .tapAsync("FileExistsPlugin", (request, resolveContext, callback) => {
+        const file = request.path;
+        fs.stat(file, (err, stat) => {
           // 路径不存在，说明解析文件路径失败
-					if (err || !stat) {
-						if (resolveContext.missing) resolveContext.missing.add(file);
-						if (resolveContext.log) resolveContext.log(file + " doesn't exist");
-						return callback();
-					}
+          if (err || !stat) {
+            if (resolveContext.missing) resolveContext.missing.add(file);
+            if (resolveContext.log) resolveContext.log(file + " doesn't exist");
+            return callback();
+          }
           // 路径是一个目录，而不是一个文件，说明解析文件路径失败
-					if (!stat.isFile()) {
-						if (resolveContext.missing) resolveContext.missing.add(file);
-						if (resolveContext.log) resolveContext.log(file + " is not a file");
-						return callback();
-					}
+          if (!stat.isFile()) {
+            if (resolveContext.missing) resolveContext.missing.add(file);
+            if (resolveContext.log) resolveContext.log(file + " is not a file");
+            return callback();
+          }
           // 的确是文件路径，将流程转向 existingFile
-					resolver.doResolve(
-						target,
-						request,
-						"existing file: " + file,
-						resolveContext,
-						callback
-					);
-				});
-			});
-	}
+          resolver.doResolve(
+            target,
+            request,
+            "existing file: " + file,
+            resolveContext,
+            callback
+          );
+        });
+      });
+  }
 };
 ```
 :::
@@ -2370,20 +2370,20 @@ module.exports = class FileExistsPlugin {
 :::details NextPlugin.js
 ```js
 module.exports = class NextPlugin {
-	constructor(source, target) {
-		this.source = source; // existingFile
-		this.target = target; // resolved
-	}
+  constructor(source, target) {
+    this.source = source; // existingFile
+    this.target = target; // resolved
+  }
 
-	apply(resolver) {
-		const target = resolver.ensureHook(this.target);
+  apply(resolver) {
+    const target = resolver.ensureHook(this.target);
     // 流程推向 resolved hook
-		resolver
-			.getHook(this.source)
-			.tapAsync("NextPlugin", (request, resolveContext, callback) => {
-				resolver.doResolve(target, request, null, resolveContext, callback);
-			});
-	}
+    resolver
+      .getHook(this.source)
+      .tapAsync("NextPlugin", (request, resolveContext, callback) => {
+        resolver.doResolve(target, request, null, resolveContext, callback);
+      });
+  }
 };
 ```
 :::
@@ -2400,55 +2400,55 @@ const slashCode = "/".charCodeAt(0);
 const backslashCode = "\\".charCodeAt(0);
 
 const isInside = (path, parent) => {
-	if (!path.startsWith(parent)) return false;
-	if (path.length === parent.length) return true;
-	const charCode = path.charCodeAt(parent.length);
-	return charCode === slashCode || charCode === backslashCode;
+  if (!path.startsWith(parent)) return false;
+  if (path.length === parent.length) return true;
+  const charCode = path.charCodeAt(parent.length);
+  return charCode === slashCode || charCode === backslashCode;
 };
 
 module.exports = class RestrictionsPlugin {
-	constructor(source, restrictions) {
-		this.source = source; // resolved
-		this.restrictions = restrictions; // [string, RegExp]
-	}
+  constructor(source, restrictions) {
+    this.source = source; // resolved
+    this.restrictions = restrictions; // [string, RegExp]
+  }
 
-	apply(resolver) {
-		resolver
-			.getHook(this.source)
-			.tapAsync("RestrictionsPlugin", (request, resolveContext, callback) => {
-				if (typeof request.path === "string") {
-					const path = request.path;
+  apply(resolver) {
+    resolver
+      .getHook(this.source)
+      .tapAsync("RestrictionsPlugin", (request, resolveContext, callback) => {
+        if (typeof request.path === "string") {
+          const path = request.path;
 
-					for (let i = 0; i < this.restrictions.length; i++) {
-						const rule = this.restrictions[i];
+          for (let i = 0; i < this.restrictions.length; i++) {
+            const rule = this.restrictions[i];
             // rule 为字符串
-						if (typeof rule === "string") {
+            if (typeof rule === "string") {
               // rule 包含 path
-							if (!isInside(path, rule)) {
-								if (resolveContext.log) {
-									resolveContext.log(
-										`${path} is not inside of the restriction ${rule}`
-									);
-								}
+              if (!isInside(path, rule)) {
+                if (resolveContext.log) {
+                  resolveContext.log(
+                    `${path} is not inside of the restriction ${rule}`
+                  );
+                }
                 // 跳过后续的 tapAsyncCallback，也就是 ResultPlugin
                 // 返回结果为 null，表示没有解析到路径
-								return callback(null, null);
-							}
-						} else if (!rule.test(path)) { // path 没有命中当前正则
-							if (resolveContext.log) {
-								resolveContext.log(
-									`${path} doesn't match the restriction ${rule}`
-								);
-							}
+                return callback(null, null);
+              }
+            } else if (!rule.test(path)) { // path 没有命中当前正则
+              if (resolveContext.log) {
+                resolveContext.log(
+                  `${path} doesn't match the restriction ${rule}`
+                );
+              }
               // 跳过后续的 tapAsyncCallback，也就是 ResultPlugin，并且返回结果为 null
-							return callback(null, null);
-						}
-					}
-				}
+              return callback(null, null);
+            }
+          }
+        }
         // 进入下一个 tapAsyncCallback，也就是 ResultPlugin 内部
-				callback();
-			});
-	}
+        callback();
+      });
+  }
 };
 ```
 :::
@@ -2460,25 +2460,25 @@ RestrictionsPlugin 用来校验请求是否符合 restrictions 规则，如果�
 :::details ResultPlugin.js
 ```js
 module.exports = class ResultPlugin {
-	constructor(source) {
-		this.source = source;
-	}
+  constructor(source) {
+    this.source = source;
+  }
 
-	apply(resolver) {
-		this.source.tapAsync(
-			"ResultPlugin",
-			(request, resolverContext, callback) => {
-				const obj = Object.assign({}, request);
-				if (resolverContext.log)
-					resolverContext.log("reporting result " + obj.path);
+  apply(resolver) {
+    this.source.tapAsync(
+      "ResultPlugin",
+      (request, resolverContext, callback) => {
+        const obj = Object.assign({}, request);
+        if (resolverContext.log)
+          resolverContext.log("reporting result " + obj.path);
         // 调用 resolver.hooks.result，并且调用 callback 传入 obj，开始不断的解开“套娃”
-				resolver.hooks.result.callAsync(obj, resolverContext, err => {
-					if (err) return callback(err);
-					callback(null, obj);
-				});
-			}
-		);
-	}
+        resolver.hooks.result.callAsync(obj, resolverContext, err => {
+          if (err) return callback(err);
+          callback(null, obj);
+        });
+      }
+    );
+  }
 };
 ```
 :::
@@ -2488,3 +2488,11 @@ ResultPlugin 表示路径已经解析出来了。
 ## 流程图
 
 因为 resolver 的 hooks 非常多，而且 hooks 之间可能会来回穿梭，所以理解 Resolver 的最好方法就是画图。
+
+<img :src="$withBase('/assets/resolverFactory.png')" />
+
+上面**绿色线条**，代表在解析路径的时候，可能需要重新返回 resolve hook，发起新一轮的路径解析。
+
+对于 request 是 module 类型，逻辑与一般的路径解析有点差别。
+
+对于配置 resolveToContext 的路径，在 existingDirectory hook 的阶段就直接跳到 resolved hook，结束了路径的解析工作。
