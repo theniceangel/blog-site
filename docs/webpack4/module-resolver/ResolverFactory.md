@@ -2084,6 +2084,8 @@ module.exports = {
 // index.js
 import './a.js' // 报错，找不到模块
 import './a' // 不报错，找到 './a.js'
+
+// 作者的意图就是希望所有的请求都不能带 extension，在查找路径的时候，默认会拼接 options.extension
 ```
 
 :::details TryNextPlugin.js
