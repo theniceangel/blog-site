@@ -50,6 +50,13 @@ module.exports = {
           ]
         },
         {
+          text: 'Loader 原理',
+          children: [
+            '/webpack4/loaders/README.md',
+            '/webpack4/loaders/loader-runner.md',
+          ]
+        },
+        {
           text: 'webpack 内部插件合集',
           children: [
             '/webpack4/internal-plugins/TemplatedPathPlugin.md',

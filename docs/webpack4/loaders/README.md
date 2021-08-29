@@ -4,12 +4,19 @@ Loaders 是支撑起 webpack 架构的两大核心之一，它允许你对模块
 
 ## 使用 loaders
 
-// TODO
+使用 loaders 是需要在 webpack.config.js 配置对应的 `module.rules`。
 
-## 写一个 loader
-
-// TODO
+```js
+module.exports = {
+  module: {
+    rules: [
+      { test: /\.css$/, loader: 'css-loader', options: { modules: true } }, // css 文件都会被 css-loader 处理
+      { test: /\.ts$/, use: 'ts-loader' } // ts 文件都会被 ts-loader 处理
+    ]
+  }
+};
+```
 
 ## loader 的运行机制
 
-请👇[loader-runner](./loader-runner.md) 来了解 loader 的原理，以及什么是 `'pitch'`。
+请👇[loader-runner](./loader-runner.md) 来了解 loader 的原理，以及什么是 `'pitch'` 与 `'normal'`。
