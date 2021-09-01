@@ -577,3 +577,13 @@ runLoaders 主要分为以下三步。
         return Promise.resolve(content)
       };
       ```
+
+## 流程图
+
+对于一个常规的 runLoaders 的逻辑包含 pitch 以及 normal 两个阶段，pitch 的顺序是**从左向右**，接着调用 `processResource` 获取待处理模块的文件内容，最后 normal 的顺序是**从右向左**。
+
+<img :src="$withBase('/assets/loader-runner-regular.png')" />
+
+但是 loader 的 pitch 函数有个特性，支持**返回值**，返回值会替换**待处理模块的文件内容**，跳过后续所有的 loaders pitch，直接进入到**前一个 loader** 的 normal 函数。这种行为运用在 `style-loader` 以及 `vue-loader` 等等项目当中。
+
+<img :src="$withBase('/assets/loader-runner-break.png')" />
