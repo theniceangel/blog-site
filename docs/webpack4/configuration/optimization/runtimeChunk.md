@@ -72,7 +72,7 @@ constructor(options) {
 
 提供默认的配置，相当于 runtimeChunk 配置为 `true | 'multiple'`。
 
-### 二. 钩子
+### 二. hooks
 
 ```js
 compiler.hooks.thisCompilation.tap("RuntimeChunkPlugin", compilation => {

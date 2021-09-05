@@ -7,11 +7,11 @@
 :::details webpack.config.js
 ```js
 module.exports = {
-	context: __dirname,
-	entry: './index.js',
-	output: {
-		filename: "[name].js"
-	}
+  context: __dirname,
+  entry: './index.js',
+  output: {
+    filename: "[name].js"
+  }
 };
 ```
 :::

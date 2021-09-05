@@ -72,34 +72,7 @@ switch (options.target) {
 
 - **JsonpTemplatePlugin**
 
-    插件位于 `lib/web/JsonpTemplatePlugin.js`，
-
-    :::details JsonpTemplatePlugin.js
-    ```js
-    const JsonpMainTemplatePlugin = require("./JsonpMainTemplatePlugin");
-    const JsonpChunkTemplatePlugin = require("./JsonpChunkTemplatePlugin");
-    const JsonpHotUpdateChunkTemplatePlugin = require("./JsonpHotUpdateChunkTemplatePlugin");
-
-    class JsonpTemplatePlugin {
-      apply(compiler) {
-        compiler.hooks.thisCompilation.tap("JsonpTemplatePlugin", compilation => {
-          // 用于 runtime chunk 生成代码
-          new JsonpMainTemplatePlugin().apply(compilation.mainTemplate);
-          // 用于非 runtime chunk 生成代码
-          new JsonpChunkTemplatePlugin().apply(compilation.chunkTemplate);
-          // 用于开启 hmr
-          new JsonpHotUpdateChunkTemplatePlugin().apply(
-            compilation.hotUpdateChunkTemplate
-          );
-        });
-      }
-    }
-    ```
-    :::
-
-    JsonpTemplatePlugin 只是对 `JsonpMainTemplatePlugin`、`JsonpChunkTemplatePlugin`、`JsonpHotUpdateChunkTemplatePlugin` 这三个插件进行了聚合。
-
-    // TODO 应该有一篇文章分析这三个 plugin 的具体逻辑。
+    详细的解读，请👇[JsonpTemplatePlugin](../internal-plugins/jsonpChunkTemplate/JsonpTemplatePlugin.md)。
 
 - **FetchCompileWasmTemplatePlugin**
 
@@ -269,6 +242,10 @@ new WebAssemblyModulesPlugin({
 new EntryOptionPlugin().apply(compiler);
 compiler.hooks.entryOption.call(options.context, options.entry);
 ```
+
+- **EntryOptionPlugin**
+
+    EntryOptionPlugin 决定了 webpack 入口文件需要使用什么类型的插件。详细的分析，请👇[EntryOptionPlugin](../internal-plugins/entry/EntryOptionPlugin.md)。
 
 ### 第七步：跟 JS 模块规范有关的插件
 

@@ -21,15 +21,15 @@ export default 'a'
 const path = require('path')
 module.exports = {
   mode: "development",
-	context: __dirname,
-	entry: './index.js',
-	output: {
-		path: path.join(__dirname, "dist"),
-		filename: "[name].js"
-	},
-	optimization: {
-		minimize: false
-	}
+  context: __dirname,
+  entry: './index.js',
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js"
+  },
+  optimization: {
+    minimize: false
+  }
 };
 ```
 :::
@@ -258,11 +258,11 @@ module.exports = {
   mode: "development",
   context: __dirname,
   devtool: false,
-	entry: './index.js',
-	output: {
-		path: path.join(__dirname, "dist")
-	},
-	optimization: {
+  entry: './index.js',
+  output: {
+    path: path.join(__dirname, "dist")
+  },
+  optimization: {
     minimize: false,
   },
   externals: {
@@ -436,27 +436,27 @@ jquery 模块就是 external module，它的模块导出受到 webpack externals
 var path = require("path");
 var webpack = require("webpack");
 module.exports = {
-	resolve: {
-		extensions: [".js", ".jsx"]
-	},
-	context: __dirname,
-	entry: {
-		alpha: ["./a"], // alpha value 必须是一个数组
-	},
-	output: {
-		path: path.join(__dirname, "dist"),
-		filename: "MyDll.[name].js",
-		library: "__MYDLL__"
-	},
-	optimization: {
-		minimize: false,
-	},
-	plugins: [
-		new webpack.DllPlugin({
-			path: path.join(__dirname, "dist", "[name]-manifest.json"),
-			name: "__MYDLL__"
-		})
-	]
+  resolve: {
+    extensions: [".js", ".jsx"]
+  },
+  context: __dirname,
+  entry: {
+    alpha: ["./a"], // alpha value 必须是一个数组
+  },
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "MyDll.[name].js",
+    library: "__MYDLL__"
+  },
+  optimization: {
+    minimize: false,
+  },
+  plugins: [
+    new webpack.DllPlugin({
+      path: path.join(__dirname, "dist", "[name]-manifest.json"),
+      name: "__MYDLL__"
+    })
+  ]
 };
 ```
 :::
@@ -591,19 +591,19 @@ var webpack = require("webpack");
 module.exports = {
   context: __dirname,
   entry: './index.js',
-	output: {
-		path: path.join(__dirname, "dist"),
-		filename: "[name].js",
-	},
-	optimization: {
-		minimize: false,
-	},
-	plugins: [
-		new webpack.DllReferencePlugin({ // 消费 dist/MyDll.alpha.js
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js",
+  },
+  optimization: {
+    minimize: false,
+  },
+  plugins: [
+    new webpack.DllReferencePlugin({ // 消费 dist/MyDll.alpha.js
       context: __dirname,
-			manifest: require("./dist/alpha-manifest.json") // eslint-disable-line
-		})
-	]
+      manifest: require("./dist/alpha-manifest.json") // eslint-disable-line
+    })
+  ]
 };
 ```
 :::

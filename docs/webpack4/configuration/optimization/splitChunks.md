@@ -258,85 +258,85 @@ class SplitChunksPlugin {
 
   ```js
   static normalizeCacheGroups({
-		cacheGroups,
-		name,
-		automaticNameDelimiter,
-		automaticNameMaxLength
-	}) {
+    cacheGroups,
+    name,
+    automaticNameDelimiter,
+    automaticNameMaxLength
+  }) {
     // 第一种：函数
-		if (typeof cacheGroups === "function") {
-			// TODO webpack 5 remove this
-			if (cacheGroups.length !== 1) {
-				return module => cacheGroups(module, module.getChunks());
-			}
-			return cacheGroups;
+    if (typeof cacheGroups === "function") {
+      // TODO webpack 5 remove this
+      if (cacheGroups.length !== 1) {
+        return module => cacheGroups(module, module.getChunks());
+      }
+      return cacheGroups;
     }
     // 第二种：对象
-		if (cacheGroups && typeof cacheGroups === "object") {
-			const fn = module => {
-				let results;
-				for (const key of Object.keys(cacheGroups)) {
-					let option = cacheGroups[key];
-					if (option === false) continue;
-					if (option instanceof RegExp || typeof option === "string") {
-						option = {
-							test: option
-						};
-					}
-					if (typeof option === "function") {
-						let result = option(module);
-						if (result) {
-							if (results === undefined) results = [];
-							for (const r of Array.isArray(result) ? result : [result]) {
-								const result = Object.assign({ key }, r);
-								if (result.name) result.getName = () => result.name;
-								if (result.chunks) {
-									result.chunksFilter = SplitChunksPlugin.normalizeChunksFilter(
-										result.chunks
-									);
-								}
-								results.push(result);
-							}
-						}
-					} else if (SplitChunksPlugin.checkTest(option.test, module)) {
-						if (results === undefined) results = [];
-						results.push({
-							key: key,
-							priority: option.priority,
-							getName:
-								SplitChunksPlugin.normalizeName({
-									name: option.name || name,
-									automaticNameDelimiter:
-										typeof option.automaticNameDelimiter === "string"
-											? option.automaticNameDelimiter
-											: automaticNameDelimiter,
-									automaticNamePrefix: option.automaticNamePrefix,
-									automaticNameMaxLength:
-										option.automaticNameMaxLength || automaticNameMaxLength
-								}) || (() => {}),
-							chunksFilter: SplitChunksPlugin.normalizeChunksFilter(
-								option.chunks
-							),
-							enforce: option.enforce,
-							minSize: option.minSize,
-							enforceSizeThreshold: option.enforceSizeThreshold,
-							maxSize: option.maxSize,
-							minChunks: option.minChunks,
-							maxAsyncRequests: option.maxAsyncRequests,
-							maxInitialRequests: option.maxInitialRequests,
-							filename: option.filename,
-							reuseExistingChunk: option.reuseExistingChunk
-						});
-					}
-				}
-				return results;
-			};
-			return fn;
+    if (cacheGroups && typeof cacheGroups === "object") {
+      const fn = module => {
+        let results;
+        for (const key of Object.keys(cacheGroups)) {
+          let option = cacheGroups[key];
+          if (option === false) continue;
+          if (option instanceof RegExp || typeof option === "string") {
+            option = {
+              test: option
+            };
+          }
+          if (typeof option === "function") {
+            let result = option(module);
+            if (result) {
+              if (results === undefined) results = [];
+              for (const r of Array.isArray(result) ? result : [result]) {
+                const result = Object.assign({ key }, r);
+                if (result.name) result.getName = () => result.name;
+                if (result.chunks) {
+                  result.chunksFilter = SplitChunksPlugin.normalizeChunksFilter(
+                    result.chunks
+                  );
+                }
+                results.push(result);
+              }
+            }
+          } else if (SplitChunksPlugin.checkTest(option.test, module)) {
+            if (results === undefined) results = [];
+            results.push({
+              key: key,
+              priority: option.priority,
+              getName:
+                SplitChunksPlugin.normalizeName({
+                  name: option.name || name,
+                  automaticNameDelimiter:
+                    typeof option.automaticNameDelimiter === "string"
+                      ? option.automaticNameDelimiter
+                      : automaticNameDelimiter,
+                  automaticNamePrefix: option.automaticNamePrefix,
+                  automaticNameMaxLength:
+                    option.automaticNameMaxLength || automaticNameMaxLength
+                }) || (() => {}),
+              chunksFilter: SplitChunksPlugin.normalizeChunksFilter(
+                option.chunks
+              ),
+              enforce: option.enforce,
+              minSize: option.minSize,
+              enforceSizeThreshold: option.enforceSizeThreshold,
+              maxSize: option.maxSize,
+              minChunks: option.minChunks,
+              maxAsyncRequests: option.maxAsyncRequests,
+              maxInitialRequests: option.maxInitialRequests,
+              filename: option.filename,
+              reuseExistingChunk: option.reuseExistingChunk
+            });
+          }
+        }
+        return results;
+      };
+      return fn;
     }
     // 第三种：默认 fallback
-		const fn = () => {};
-		return fn;
-	}
+    const fn = () => {};
+    return fn;
+  }
   ```
 
   处理过程有三种：
@@ -386,40 +386,40 @@ class SplitChunksPlugin {
 
   // 4. 根据 option.test 来返回 cacheGroups 分组结果
   static checkTest(test, module) {
-		if (test === undefined) return true;
-		if (typeof test === "function") {
-			if (test.length !== 1) {
-				return test(module, module.getChunks());
-			}
-			return test(module);
-		}
-		if (typeof test === "boolean") return test;
-		if (typeof test === "string") {
-			if (
-				module.nameForCondition &&
-				module.nameForCondition().startsWith(test)
-			) {
-				return true;
-			}
-			for (const chunk of module.chunksIterable) {
-				if (chunk.name && chunk.name.startsWith(test)) {
-					return true;
-				}
-			}
-			return false;
-		}
-		if (test instanceof RegExp) {
-			if (module.nameForCondition && test.test(module.nameForCondition())) {
-				return true;
-			}
-			for (const chunk of module.chunksIterable) {
-				if (chunk.name && test.test(chunk.name)) {
-					return true;
-				}
-			}
-			return false;
-		}
-		return false;
+    if (test === undefined) return true;
+    if (typeof test === "function") {
+      if (test.length !== 1) {
+        return test(module, module.getChunks());
+      }
+      return test(module);
+    }
+    if (typeof test === "boolean") return test;
+    if (typeof test === "string") {
+      if (
+        module.nameForCondition &&
+        module.nameForCondition().startsWith(test)
+      ) {
+        return true;
+      }
+      for (const chunk of module.chunksIterable) {
+        if (chunk.name && chunk.name.startsWith(test)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (test instanceof RegExp) {
+      if (module.nameForCondition && test.test(module.nameForCondition())) {
+        return true;
+      }
+      for (const chunk of module.chunksIterable) {
+        if (chunk.name && test.test(chunk.name)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return false;
   }
   
   // 4.1 test不存在，代表所有 module 都能加入这个分组

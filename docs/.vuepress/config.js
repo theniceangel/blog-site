@@ -16,7 +16,8 @@ module.exports = {
           children: [
             '/webpack4/term/module.md',
             '/webpack4/term/chunk.md',
-            '/webpack4/term/entrypoint&chunkGroup.md'
+            '/webpack4/term/entrypoint&chunkGroup.md',
+            '/webpack4/term/dependency&moduleFactory.md'
           ]
         },
         {
@@ -38,7 +39,10 @@ module.exports = {
             '/webpack4/webpack-process/handle-options.md',
             '/webpack4/webpack-process/new-compiler.md',
             '/webpack4/webpack-process/inner-plugins.md',
-            '/webpack4/webpack-process/run-compiler.md'
+            '/webpack4/webpack-process/run-compiler.md',
+            '/webpack4/webpack-process/before-compile.md',
+            '/webpack4/webpack-process/compiling.md',
+            '/webpack4/webpack-process/compiling-modules.md'
           ]
         },
         {
@@ -59,6 +63,7 @@ module.exports = {
         {
           text: 'webpack 内部插件合集',
           children: [
+            '/webpack4/internal-plugins/entry/EntryOptionPlugin.md',
             '/webpack4/internal-plugins/TemplatedPathPlugin.md',
             '/webpack4/internal-plugins/WarnCaseSensitiveModulesPlugin.md',
           ]

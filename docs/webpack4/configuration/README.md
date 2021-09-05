@@ -47,3 +47,5 @@ webpack 的配置非常的多，这个部分会尽可能的根据每个 option �
 ## Other Options
 
 [infrastructureLogging](./infrastructureLogging.md)
+
+[recordsPath, recordsInputPath, recordsOutputPath](./recordsPath&recordsInputPath&recordsOutputPath.md)

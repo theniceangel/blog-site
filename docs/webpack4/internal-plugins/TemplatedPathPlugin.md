@@ -5,7 +5,7 @@ webpack 使用一种 `'substitutions'` 的技术，支持 `output.filename`、`o
 | template | 作用 |
 | ---- | ---- |
 | [hash] | module id 的哈希值 |
-| [contenthash] | 文件内容的哈希，比如图片 |
+| [contenthash] | 文件内容的哈希 |
 | [chunkhash] | chunk 内容的哈希值 |
 | [name] | 模块名称 |
 | [id] | module id |
