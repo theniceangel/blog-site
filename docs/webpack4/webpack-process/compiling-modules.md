@@ -124,6 +124,7 @@ class Compilation {
           callback();
         };
 
+    // dependency 参数必须是 Dependency 实例
     if (
       typeof dependency !== "object" ||
       dependency === null ||
@@ -133,13 +134,15 @@ class Compilation {
     }
     const Dep = /** @type {DepConstructor} */ (dependency.constructor);
     const moduleFactory = this.dependencyFactories.get(Dep);
+    // dependency 必须要有对应的 moduleFactory
     if (!moduleFactory) {
       throw new Error(
         `No dependency factory available for this dependency type: ${dependency.constructor.name}`
       );
     }
-
+    // 控制并发任务的信号机
     this.semaphore.acquire(() => {
+      // 调用 moduleFactory 生成对应的 module
       moduleFactory.create(
         {
           contextInfo: {
@@ -212,3 +215,49 @@ class Compilation {
   }
  }
 ```
+
+_addModuleChain 接收 dependency，这样就能通过 `dependency-moduleFactory-module` 这样的链路生成对应类型的 module，这三者的联系可以查阅 [dependency&moduleFactory](../term/dependency&moduleFactory.md)。在生成 module 的时候，内部会有一个叫 semaphore 的东西，它的作用是控制构建模块的并发任务的数量，**每一个 module 的构建都是存在异步操作的**，这样能尽可能的减少模块构建的时间。所以来看下 semaphore 的实现。
+
+:::details lib/util/
+```js
+class Semaphore {
+	constructor(available) {
+    // 任务的最大并发量
+		this.available = available;
+    // 等待执行的任务队列
+		this.waiters = [];
+		this._continue = this._continue.bind(this);
+	}
+
+  // 手动执行任务，或者将任务放入待执行列表
+	acquire(callback) {
+		if (this.available > 0) {
+			this.available--;
+			callback();
+		} else {
+			this.waiters.push(callback);
+		}
+	}
+
+  // 释放任务，并且尝试从待执行的任务队列取出任务并执行
+	release() {
+		this.available++;
+		if (this.waiters.length > 0) {
+			process.nextTick(this._continue);
+		}
+	}
+
+	_continue() {
+		if (this.available > 0) {
+			if (this.waiters.length > 0) {
+				this.available--;
+				const callback = this.waiters.pop();
+				callback();
+			}
+		}
+	}
+}
+```
+:::
+
+Semaphore 的实现特别的简单而且有效，想一想如果没有这么一个控制并发任务的信号机，webpack 构建 module 都是串行的话，那随着模块数量的增加，以及模块内容的增多，构建的时间会大幅度的上升。

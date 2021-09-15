@@ -10,6 +10,15 @@ module.exports = {
     logo: '/assets/logo.jpeg',
     repo: 'https://github.com/theniceangel',
     sidebar: {
+      '/': [
+        {
+          text: 'sourcemap',
+          children: [
+            '/sourcemap/base64.md',
+            '/sourcemap/unicodeInJavascript.md',
+          ]
+        }
+      ],
       '/webpack4/': [
         {
           text: '术语',
