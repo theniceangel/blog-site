@@ -15,6 +15,7 @@ module.exports = {
           text: 'sourcemap',
           children: [
             '/sourcemap/base64.md',
+            '/sourcemap/README.md',
             '/sourcemap/unicodeInJavascript.md',
           ]
         }
