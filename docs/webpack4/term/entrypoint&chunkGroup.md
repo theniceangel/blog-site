@@ -543,5 +543,5 @@ entrypoint 的生成受 webpack entry 配置的影响，如果是对象，那么
 
 isInitial 方法对于 Entrypoint 也是非常的关键，这个属性决定了是否要手动的在 html 文件通过 script 引入对应的 js 文件，这些 js 文件都是 Entrypoint 包含的 chunks 生成的，理解这一点，对你理解 [splitChunks](../configuration/optimization/splitChunks.md) 配置非常关键。
 
-**总而言之，webpack 内部 chunkGraph 的数量取决于代码分割的次数和 entry 配置**
+**总而言之，webpack 内部 chunkGroups 的数量取决于代码分割的次数和 entry 配置**
 
