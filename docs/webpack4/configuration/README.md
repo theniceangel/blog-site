@@ -12,6 +12,10 @@ webpack 的配置非常的多，这个部分会尽可能的根据每个 option �
 
 [chunkFilename](./output/chunkFilename.md)
 
+## devtool
+
+[devtool](./devtool/README.md)
+
 ## optimization
 
 [filename](./optimization/splitChunks.md)

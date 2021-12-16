@@ -208,5 +208,5 @@
 想要测试以上的结果可以使用 [playground](https://base64.us/)。
 
 :::danger 危险
-在 JavaScript 里面，编码都是 UTF-16 格式，对于**汉字**而言，码点与 UTF-8 不一致，所以需要将 UTF-16 的码点转换成 UTF-8。关于 UTF-8 的 unicode 可以👇[Unicode In Javascript](./unicodeInJavascript.md)。
+在 JavaScript 里面，编码都是 UTF-16 格式，对于**汉字**而言，码点与 UTF-8 不一致，所以需要将 UTF-16 的码点转换成 UTF-8。想要了解 UTF-8 的 unicode 可以👇[Unicode In Javascript](./unicodeInJavascript.md)。
 :::
