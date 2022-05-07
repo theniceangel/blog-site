@@ -16,7 +16,7 @@ module.exports = {
           children: [
             '/sourcemap/base64.md',
             '/sourcemap/README.md',
-            '/sourcemap/unicodeInJavascript.md',
+            '/sourcemap/unicodeInJavascript.md'
           ]
         }
       ],
@@ -32,15 +32,11 @@ module.exports = {
         },
         {
           text: 'tapable-1.1.3',
-          children: [
-            '/webpack4/tapable'
-          ]
+          children: ['/webpack4/tapable']
         },
         {
           text: '流程图',
-          children: [
-            '/webpack4/introduction/flow-diagram.md'
-          ]
+          children: ['/webpack4/introduction/flow-diagram.md']
         },
         {
           text: '编译全流程',
@@ -60,14 +56,14 @@ module.exports = {
           children: [
             '/webpack4/module-resolver/README.md',
             '/webpack4/module-resolver/Resolver.md',
-            '/webpack4/module-resolver/ResolverFactory.md',
+            '/webpack4/module-resolver/ResolverFactory.md'
           ]
         },
         {
           text: 'Loader 原理',
           children: [
             '/webpack4/loaders/README.md',
-            '/webpack4/loaders/loader-runner.md',
+            '/webpack4/loaders/loader-runner.md'
           ]
         },
         {
@@ -75,20 +71,22 @@ module.exports = {
           children: [
             '/webpack4/internal-plugins/entry/EntryOptionPlugin.md',
             '/webpack4/internal-plugins/TemplatedPathPlugin.md',
-            '/webpack4/internal-plugins/WarnCaseSensitiveModulesPlugin.md',
+            '/webpack4/internal-plugins/WarnCaseSensitiveModulesPlugin.md'
           ]
         },
         {
           text: 'webpack 第三方库',
-          children: [
-            '/webpack4/third-dependencies/README.md'
-          ]
+          children: ['/webpack4/third-dependencies/README.md']
         },
         {
           text: 'webpack 配置项',
-          children: [
-            '/webpack4/configuration/README.md'
-          ]
+          children: ['/webpack4/configuration/README.md']
+        }
+      ],
+      '/networks/': [
+        {
+          text: '网络知识',
+          children: ['/networks/https.md']
         }
       ]
     },
@@ -104,7 +102,7 @@ module.exports = {
             text: 'v3',
             link: '/vue3/README.md'
           }
-        ],
+        ]
       },
       {
         text: 'webpack 源码合集',
@@ -117,9 +115,18 @@ module.exports = {
             text: 'v5',
             link: '/webpack5/README.md'
           }
-        ],
+        ]
+      },
+      {
+        text: '计算机基础知识',
+        children: [
+          {
+            text: '网络',
+            link: '/networks/README.md'
+          }
+        ]
       }
-    ],
+    ]
   },
   plugins: [
     [
