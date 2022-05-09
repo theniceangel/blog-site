@@ -88,6 +88,12 @@ module.exports = {
           text: '网络知识',
           children: ['/networks/https.md']
         }
+      ],
+      '/nginx/': [
+        {
+          text: '概念',
+          children: ['/nginx/README.md']
+        }
       ]
     },
     navbar: [
@@ -123,6 +129,10 @@ module.exports = {
           {
             text: '网络',
             link: '/networks/README.md'
+          },
+          {
+            text: 'nginx',
+            link: '/nginx/README.md'
           }
         ]
       }
