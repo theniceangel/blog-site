@@ -31,7 +31,7 @@ module.exports = {
           ]
         },
         {
-          text: 'tapable-1.1.3',
+          text: 'tapable',
           children: ['/webpack4/tapable']
         },
         {
