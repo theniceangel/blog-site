@@ -241,7 +241,7 @@ Tapable.prototype.applyPluginsAsyncSeries = Tapable.prototype.applyPluginsAsync 
  ```
  :::
 
- applyPluginsAsyncSeries 要求每个 `pluginFunction` 手动调用 next 函数，才会执行下一个  `pluginFunction`，这样也就实现了异步顺序执行的功能，`Series` 的中文就是按顺序。
+ applyPluginsAsyncSeries 要求每个 `pluginFunction` 手动调用 next 函数，才会执行下一个  `pluginFunction`，这样也就实现了异步顺序执行的功能，`Series` 的中文就是串行。
 
  举个例子：
 
@@ -510,4 +510,4 @@ Tapable.prototype.applyPluginsAsyncSeries = Tapable.prototype.applyPluginsAsync 
 
 ## 总结
 
-作为 0.x 版本，其实功能已经满足 webpack 使用，但是仔细发现，0.x 版本对于异步类型来说，不支持 `promise`，当然不影响整个库完备的`同步与异步`逻辑，不过由于异步的 pluginFunction 都得依赖用户手动调用 next 函数，每次都需要开辟栈内存并且不能够及时的回收，导致 webpack 内部构建非常吃内存，很容易造成 stackOverflow，因此 [1.x](../tapable-1.x/README.md) 通过 `new Function` 的编译方式来解决栈溢出的问题，并且也支持了 `promise` 的能力。
+作为 0.x 版本，其实功能已经满足 webpack 使用，但是仔细发现，0.x 版本对于异步类型来说，不支持 `promise`，当然不影响整个库完备的`同步与异步`逻辑，不过由于异步的 pluginFunction 都得依赖用户手动调用 next 函数，每次都需要开辟栈内存并且不能够及时的回收，导致 webpack 内部构建非常吃内存，很容易造成 stackOverflow，因此 [1.x](../tapable-1.x/README.md) 通过 `new Function` 的编译方式来解决栈溢出的问题，并且也支持了 `promise` 的能力，而且也支持了排序 `pluginFunction` 的能力。
