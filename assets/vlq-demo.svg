@@ -1,0 +1,69 @@
+<svg width="580" height="450" xmlns="http://www.w3.org/2000/svg">
+									<!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+									<g>
+										<title>background</title>
+										<rect fill="#fff" id="canvas_background" height="452" width="582" y="-1" x="-1"></rect>
+										<g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+											<rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"></rect>
+										</g>
+									</g>
+									<g>
+										<title>Layer 1</title>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="14" id="svg_1" y="37.4375" x="50.5" stroke-width="0" stroke="#000" fill="#000000">数字</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_2" y="73.45474" x="60.5" stroke-width="0" stroke="#000" fill="#000000">7</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="14" id="svg_3" y="37.4375" x="156.59297" stroke-width="0" stroke="#000" fill="#000000">二进制</text>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_4" y="71.45474" x="161.54786" stroke-width="0" stroke="#000" fill="#000000">111</text>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="14" id="svg_5" y="37.4375" x="338.61082" stroke-width="0" stroke="#000" fill="#000000">vlq表示</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_6" y="66.45474" x="328.56438" stroke-width="0" stroke="#000" fill="#000000">001110</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_8" y="97.4375" x="348.59297" stroke-width="0" stroke="#000" fill="#000000">内容</text>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_9" y2="110.4375" x2="308.5" y1="72.4375" x1="331.5" opacity="0.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_10" y="128.4375" x="246.52409" stroke-width="0" stroke="#000" fill="#000000">是否连续(1连续,0不连续）</text>
+										<line stroke-linecap="null" stroke-linejoin="null" id="svg_11" y2="89.4375" x2="427.5" y1="69.4375" x1="390.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#000" fill="none"></line>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_12" y="109.4375" x="401.52409" stroke-width="0" stroke="#000" fill="#000000">正负数(0正数,1负数)</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_13" y="183.45474" x="39.5" stroke-width="0" stroke="#000" fill="#000000">1200</text>
+										<text stroke="#000" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_14" y="182.45474" x="140.54786" stroke-width="0" fill="#000000">10010110000</text>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_15" y="181.45474" x="318.56438" stroke-width="0" stroke="#000" fill="#000000">100000</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_17" y="210.4375" x="338.59297" stroke-width="0" stroke="#000" fill="#000000">内容1</text>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_18" y2="223.4375" x2="300.5" y1="185.4375" x1="323.5" opacity="0.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_19" y="241.4375" x="253.08431" stroke-width="0" stroke="#000" fill="#000000">连续标识位</text>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_25" y="180.45474" x="401.72448" stroke-width="0" stroke="#000" fill="#000000">101011</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_27" y="210.4375" x="430.59297" stroke-width="0" stroke="#000" fill="#000000">内容2</text>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_28" y2="222.4375" x2="400.5" y1="187.4375" x1="384.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_29" y="239.4375" x="391.52409" stroke-width="0" stroke="#000" fill="#000000">正数</text>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_30" y2="263.4375" x2="448.5" y1="185.4375" x1="409.5" opacity="0.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_31" y="281.4375" x="421.08431" stroke-width="0" stroke="#000" fill="#000000">连续标识位</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_36" y="208.4375" x="225.59297" stroke-width="0" stroke="#000" fill="#000000">内容1</text>
+										<line stroke-linecap="null" stroke-linejoin="null" id="svg_37" y2="73.4375" x2="380.55401" y1="73.4375" x1="343.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#000" fill="none"></line>
+										<line stroke-linecap="null" stroke-linejoin="null" id="svg_38" y2="188.4375" x2="371.55401" y1="188.4375" x1="334.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#000" fill="none"></line>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_39" y2="188.4375" x2="463.55401" y1="188.4375" x1="418.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<line stroke-linecap="null" stroke-linejoin="null" id="svg_40" y2="188.4375" x2="257.55401" y1="188.4375" x1="220.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#000" fill="none"></line>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_41" y2="188.4375" x2="213.55401" y1="188.4375" x1="167.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_42" y="208.4375" x="173.54433" stroke-width="0" stroke="#000" fill="#000000">内容2</text>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_43" y="180.45474" x="471.72448" stroke-width="0" stroke="#000" fill="#000000">000010</text>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_44" y="210.4375" x="500.59297" stroke-width="0" stroke="#000" fill="#000000">内容3</text>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_47" y2="263.4375" x2="518.5" y1="185.4375" x1="479.5" opacity="0.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_48" y="281.4375" x="491.08431" stroke-width="0" stroke="#000" fill="#000000">结束标识位</text>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_49" y2="188.4375" x2="533.55401" y1="188.4375" x1="488.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_50" y2="188.4375" x2="161.55402" y1="188.4375" x1="143.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_51" y="208.4375" x="131.54433" stroke-width="0" stroke="#000" fill="#000000">内容3</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_52" y="334.4624" x="51.5" stroke-width="0" stroke="#000" fill="#000000">-17</text>
+										<text stroke="#000" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_53" y="332.45806" x="151.48781" stroke-width="0" fill="#000000">10001</text>
+										<text stroke="#000" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="11" id="svg_54" y="305.48958" x="135.48781" stroke-width="0" fill="#000000">(取的是17的二进制)</text>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_55" y="335.45474" x="318.56438" stroke-width="0" stroke="#000" fill="#000000">100011</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_56" y="364.4375" x="338.59297" stroke-width="0" stroke="#000" fill="#000000">内容1</text>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_57" y2="377.4375" x2="300.5" y1="339.4375" x1="323.5" opacity="0.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_58" y="395.4375" x="253.08431" stroke-width="0" stroke="#000" fill="#000000">连续标识位</text>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="20" id="svg_59" y="334.45474" x="401.72448" stroke-width="0" stroke="#000" fill="#000000">000001</text>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_60" y="364.4375" x="430.59297" stroke-width="0" stroke="#000" fill="#000000">内容2</text>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_61" y2="376.4375" x2="400.5" y1="341.4375" x1="384.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_62" y="393.4375" x="391.52409" stroke-width="0" stroke="#000" fill="#000000">负数</text>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_63" y2="417.4375" x2="448.5" y1="339.4375" x1="409.5" opacity="0.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_64" y="435.4375" x="421.08431" stroke-width="0" stroke="#000" fill="#000000">结束标识位</text>
+										<line stroke-linecap="null" stroke-linejoin="null" id="svg_65" y2="342.4375" x2="371.55401" y1="342.4375" x1="334.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#000" fill="none"></line>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_66" y2="342.4375" x2="463.55401" y1="342.4375" x1="418.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_72" y="358.4375" x="171.59297" stroke-width="0" stroke="#000" fill="#000000">内容1</text>
+										<line stroke-linecap="null" stroke-linejoin="null" id="svg_73" y2="338.4375" x2="203.55401" y1="338.4375" x1="166.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#000" fill="none"></line>
+										<line stroke="#000" stroke-linecap="null" stroke-linejoin="null" id="svg_74" y2="338.4375" x2="159.55402" y1="338.4375" x1="152.5" fill-opacity="null" stroke-opacity="null" stroke-width="null" fill="none"></line>
+										<text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="12" id="svg_75" y="358.4375" x="130.54433" stroke-width="0" stroke="#000" fill="#000000">内容2</text>
+									</g>
+								</svg>
